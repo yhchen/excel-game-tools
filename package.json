@@ -1,0 +1,54 @@
+{
+  "name": "excel-game-tools",
+  "version": "3.3.1",
+  "description": "excel export with type check using rjs in super fast speed!",
+  "bin": "dist/index.js",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "cd TypeDef && tsc && cd .. && tsc",
+    "pkg": "pkg -t node12-linux,node12-macos,node12-win --compress GZip . --out-path=bin/",
+    "update_package": "npm uninstall --save xlsx chalk fs-extra-promise json_to_lua moment lodash && npm uninstall --save-dev @types/chalk @types/fs-extra-promise @types/lodash @types/moment @types/node @types/xlsx typescript && npm install --save xlsx chalk fs-extra-promise json_to_lua moment && npm install --save-dev @types/chalk @types/fs-extra-promise @types/lodash @types/moment @types/node @types/xlsx typescript",
+    "prepublishOnly": "npm run build"
+  },
+  "author": "yhchen",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "csv-parse": "^5.0.4",
+    "json_to_lua": "^1.1.0",
+    "lodash": "^4.17.21",
+    "moment": "^2.24.0",
+    "protobufjs": "^6.11.2",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.179",
+    "@types/node": "^12.20.46",
+    "pkg": "^5.8.0",
+    "typescript": "^4.8.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yhchen/excel-game-tools"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "TypeDef"
+  ],
+  "keywords": [
+    "excel",
+    "csv",
+    "export",
+    "json",
+    "lua",
+    "protobuf",
+    "game",
+    "config",
+    "typescript"
+  ],
+  "engines": {
+    "node": ">=12.0.0"
+  }
+}
