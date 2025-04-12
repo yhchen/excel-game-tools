@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 exports.__esModule = true;
 exports.Internal = exports.def = void 0;
-var moment = require("moment");
-var fs = require("fs");
+var moment = require('moment');
+var fs = require('fs');
 var debug = function () {
     var param = [];
     for (var _i = 0; _i < arguments.length; _i++) {
@@ -26,43 +26,76 @@ var def;
         // translate type
         var type = Internal.TryColumnTypeTranslate(elementType);
         // check type
-        if (type.__inner__o_type__abcxyz__ == undefined) {
+        if (type.__inner__o_type__abcxyz__ === undefined) {
             throw new Error('Array Only support [base type],[enum],[sheet.column],[object] types');
-        }
-        else if (type.__inner__o_type__abcxyz__ == 'array' || type.__inner__o_type__abcxyz__ == 'object') {
+        } else if (
+            type.__inner__o_type__abcxyz__ == 'array' ||
+            type.__inner__o_type__abcxyz__ == 'object'
+        ) {
             if (type.__inner__level__abcxyz__ > 2) {
-                throw new Error('Arrays can be defined up to two dimensions, more dimensions will not be supported!');
+                throw new Error(
+                    'Arrays can be defined up to two dimensions, more dimensions will not be supported!'
+                );
             }
         }
-        if (count == undefined || typeof count === 'number') {
-            if (count == undefined || count >= 1) {
+        if (count === undefined || typeof count === 'number') {
+            if (count === undefined || count >= 1) {
                 var parse = function (data) {
-                    if (data == undefined) {
+                    if (data === undefined) {
                         return;
                     }
                     if (typeof data !== 'object') {
                         throw new Error('data type must be array');
                     }
-                    if (count != undefined && data.length != count) {
-                        throw new Error("array length incorrect. expect: ".concat(count !== null && count !== void 0 ? count : '<variable>', " current: + ").concat(data.length));
+                    if (count !== undefined && data.length !== count) {
+                        throw new Error(
+                            'array length incorrect. expect: '
+                                .concat(
+                                    count !== null && count !== void 0 ? count : '<variable>',
+                                    ' current: + '
+                                )
+                                .concat(data.length)
+                        );
                     }
                     var res = [];
                     for (var _i = 0, data_1 = data; _i < data_1.length; _i++) {
                         var d = data_1[_i];
                         res.push(type.__inner__parse__abcxyz__(d));
                     }
-                    if (exChecker != undefined) {
+                    if (exChecker !== undefined) {
                         exChecker(res);
                     }
                     return res;
                 };
-                return Type(type, undefined, 'array', type.__inner__level__abcxyz__ + 1, count, undefined, parse, exChecker != undefined, (_b = (_a = (type)) === null || _a === void 0 ? void 0 : _a.__inner__is_json_parse_mode__) !== null && _b !== void 0 ? _b : false);
-            }
-            else {
-                throw new Error('Vector type: ' + type + 'count: ' + count + 'error! count must be greater than 1');
+                return Type(
+                    type,
+                    undefined,
+                    'array',
+                    type.__inner__level__abcxyz__ + 1,
+                    count,
+                    undefined,
+                    parse,
+                    exChecker !== undefined,
+                    (_b =
+                        (_a = type) === null || _a === void 0
+                            ? void 0
+                            : _a.__inner__is_json_parse_mode__) !== null && _b !== void 0
+                        ? _b
+                        : false
+                );
+            } else {
+                throw new Error(
+                    'Vector type: ' +
+                        type +
+                        'count: ' +
+                        count +
+                        'error! count must be greater than 1'
+                );
             }
         }
-        throw new Error('Vector type: ' + type + 'count: ' + count + 'error!, count is not a int value');
+        throw new Error(
+            'Vector type: ' + type + 'count: ' + count + 'error!, count is not a int value'
+        );
     }
     def.TArray = TArray;
     /**
@@ -73,13 +106,17 @@ var def;
      */
     function TObject(objType, exChecker) {
         var type = objType;
-        var count = 0, minCount = 0;
+        var count = 0,
+            minCount = 0;
         var typeList = [];
         for (var k in type) {
             ++count;
             ++minCount;
             type[k] = Internal.TryColumnTypeTranslate(type[k]);
-            if (type[k].__inner__o_type__abcxyz__ == undefined || type[k].__inner__level__abcxyz__ > 0) {
+            if (
+                type[k].__inner__o_type__abcxyz__ === undefined ||
+                type[k].__inner__level__abcxyz__ > 0
+            ) {
                 throw new Error('Object Only support base type, enum or other sheet.column lines');
             }
             if (type[k].__inner__is_json_parse_mode__) {
@@ -88,30 +125,43 @@ var def;
             typeList.push(type[k]);
         }
         for (var i = typeList.length - 1; i > -1; --i) {
-            if (!typeList[i].__inner_has_default_value)
-                break;
+            if (!typeList[i].__inner_has_default_value) break;
             --minCount;
         }
-        return Type(type, undefined, 'object', 1, count, undefined, function (data) {
-            if (typeof data !== 'object' || data.length < minCount) {
-                throw new Error('object type parse failure. object element count incorrect. expect: ' + count + ' current: ' + data.length);
-            }
-            var index = 0;
-            var res = {};
-            for (var k in type) {
-                if (data.length <= index) {
-                    res[k] = type[k].__inner__defaultval__abcxyz__;
+        return Type(
+            type,
+            undefined,
+            'object',
+            1,
+            count,
+            undefined,
+            function (data) {
+                if (typeof data !== 'object' || data.length < minCount) {
+                    throw new Error(
+                        'object type parse failure. object element count incorrect. expect: ' +
+                            count +
+                            ' current: ' +
+                            data.length
+                    );
                 }
-                else {
-                    res[k] = type[k].__inner__parse__abcxyz__(data[index]);
+                var index = 0;
+                var res = {};
+                for (var k in type) {
+                    if (data.length <= index) {
+                        res[k] = type[k].__inner__defaultval__abcxyz__;
+                    } else {
+                        res[k] = type[k].__inner__parse__abcxyz__(data[index]);
+                    }
+                    ++index;
                 }
-                ++index;
-            }
-            if (exChecker != undefined) {
-                exChecker(res, data);
-            }
-            return res;
-        }, exChecker != undefined, false);
+                if (exChecker !== undefined) {
+                    exChecker(res, data);
+                }
+                return res;
+            },
+            exChecker !== undefined,
+            false
+        );
     }
     def.TObject = TObject;
     /**
@@ -137,28 +187,37 @@ var def;
         var type = jsonType;
         for (var k in type) {
             type[k] = Internal.TryColumnTypeTranslate(type[k]);
-            if (type[k].__inner__o_type__abcxyz__ == undefined) {
-                throw new Error("TJson subtype invalid. key: ".concat(k));
+            if (type[k].__inner__o_type__abcxyz__ === undefined) {
+                throw new Error('TJson subtype invalid. key: '.concat(k));
             }
         }
-        return Type(type, undefined, 'object', 1, undefined, undefined, function (data) {
-            if (typeof data !== 'object') {
-                throw new Error('object type parse failure. type is not a object!');
-            }
-            var res = {};
-            for (var k in type) {
-                if (data[k] == undefined) {
-                    res[k] = type[k].__inner__defaultval__abcxyz__;
+        return Type(
+            type,
+            undefined,
+            'object',
+            1,
+            undefined,
+            undefined,
+            function (data) {
+                if (typeof data !== 'object') {
+                    throw new Error('object type parse failure. type is not a object!');
                 }
-                else {
-                    res[k] = type[k].__inner__parse__abcxyz__(data[k]);
+                var res = {};
+                for (var k in type) {
+                    if (data[k] === undefined) {
+                        res[k] = type[k].__inner__defaultval__abcxyz__;
+                    } else {
+                        res[k] = type[k].__inner__parse__abcxyz__(data[k]);
+                    }
                 }
-            }
-            if (exChecker != undefined) {
-                exChecker(res, data);
-            }
-            return res;
-        }, exChecker != undefined, true);
+                if (exChecker !== undefined) {
+                    exChecker(res, data);
+                }
+                return res;
+            },
+            exChecker !== undefined,
+            true
+        );
     }
     def.TJson = TJson;
     /**
@@ -169,14 +228,24 @@ var def;
      * @returns return TCustom type
      */
     function TCustom(type, exChecker) {
-        if (exChecker == undefined) {
+        if (exChecker === undefined) {
             return type;
         }
-        return Type(type.__inner__type__abcxyz__, type.__inner__name__abcxyz__, type.__inner__o_type__abcxyz__, type.__inner__level__abcxyz__, type.__inner__count__abcxyz__, type.__inner__defaultval__abcxyz__, function (data) {
-            var res = type.__inner__parse__abcxyz__(data);
-            exChecker(res);
-            return res;
-        }, true, type.__inner__is_json_parse_mode__);
+        return Type(
+            type.__inner__type__abcxyz__,
+            type.__inner__name__abcxyz__,
+            type.__inner__o_type__abcxyz__,
+            type.__inner__level__abcxyz__,
+            type.__inner__count__abcxyz__,
+            type.__inner__defaultval__abcxyz__,
+            function (data) {
+                var res = type.__inner__parse__abcxyz__(data);
+                exChecker(res);
+                return res;
+            },
+            true,
+            type.__inner__is_json_parse_mode__
+        );
     }
     def.TCustom = TCustom;
     /**
@@ -193,19 +262,30 @@ var def;
             var val = enumDefine[key];
             enumObject[key] = val;
             enumObject[val] = val;
-            if (val == 0)
-                hasZero = true;
+            if (val == 0) hasZero = true;
         }
         if (!hasZero) {
-            throw new Error("Due to the Proto3 protocol, enumeration types must have a default value of 0.");
+            throw new Error(
+                'Due to the Proto3 protocol, enumeration types must have a default value of 0.'
+            );
         }
-        var enumType = Type(enumDefine, name, 'enum', 0, undefined, 0, function (data) {
-            var res = enumObject[data];
-            if (res == undefined) {
-                throw new Error('enum type incorrect. data: ' + data);
-            }
-            return res;
-        }, false, false);
+        var enumType = Type(
+            enumDefine,
+            name,
+            'enum',
+            0,
+            undefined,
+            0,
+            function (data) {
+                var res = enumObject[data];
+                if (res === undefined) {
+                    throw new Error('enum type incorrect. data: ' + data);
+                }
+                return res;
+            },
+            false,
+            false
+        );
         // for outer checker
         for (var k in enumDefine) {
             enumType[k] = enumDefine[k];
@@ -225,7 +305,6 @@ var def;
         return typeof n === 'number' || (+n).toString() === n;
     }
     def.isNumber = isNumber;
-    ;
     /**
      * parse data type
      * @param date can be a date string or a Date object
@@ -234,27 +313,34 @@ var def;
     function ParseDate(date) {
         if (moment.isDate(date)) {
             return date;
-        }
-        else if (typeof date === 'string') {
+        } else if (typeof date === 'string') {
             var oDate = moment(date, Internal.DateFmt);
             if (!oDate.isValid())
-                throw new Error("[TypeParser] Date Type \"".concat(date, "\" Invalid!"));
+                throw new Error('[TypeParser] Date Type "'.concat(date, '" Invalid!'));
             return oDate.toDate();
         }
-        throw new Error("[TypeParseer] Date Type \"".concat(date, "\" Invalid!"));
+        throw new Error('[TypeParseer] Date Type "'.concat(date, '" Invalid!'));
     }
     def.ParseDate = ParseDate;
-    ;
     // generate type
     //@internal
-    function Type(type, name, otype, level, count, defaultValue, parse, has_ex_checkers, is_json_parse_mode) {
-        if (level == undefined)
-            level = 0;
-        if (type == undefined) {
-            throw new Error("type must be a string or other type!");
+    function Type(
+        type,
+        name,
+        otype,
+        level,
+        count,
+        defaultValue,
+        parse,
+        has_ex_checkers,
+        is_json_parse_mode
+    ) {
+        if (level === undefined) level = 0;
+        if (type === undefined) {
+            throw new Error('type must be a string or other type!');
         }
-        if (parse == undefined) {
-            throw new Error("Type must have a parser. for data translate");
+        if (parse === undefined) {
+            throw new Error('Type must have a parser. for data translate');
         }
         var comment = GetTypeComment();
         return {
@@ -268,21 +354,35 @@ var def;
             __inner_has_ex_checkers: has_ex_checkers,
             __inner__parse__abcxyz__: parse,
             DVAL: function (customDefaultVal) {
-                if (otype != 'enum' && otype != 'base') {
+                if (otype !== 'enum' && otype !== 'base') {
                     throw new Error('Only <enum> and <base> type can use DVAL function!');
                 }
-                if (customDefaultVal == undefined) {
-                    throw new Error("default value can not be null or undefined.");
+                if (customDefaultVal === undefined) {
+                    throw new Error('default value can not be null or undefined.');
                 }
-                if (typeof (customDefaultVal) != typeof (defaultValue)) {
-                    throw new Error("default value type incorrect! need type: ".concat(typeof (defaultValue), " current type: ").concat(typeof (customDefaultVal)));
+                if (typeof customDefaultVal !== typeof defaultValue) {
+                    throw new Error(
+                        'default value type incorrect! need type: '
+                            .concat(typeof defaultValue, ' current type: ')
+                            .concat(typeof customDefaultVal)
+                    );
                 }
-                var newType = Type(type, name, otype, level, count, customDefaultVal, parse, has_ex_checkers, is_json_parse_mode);
+                var newType = Type(
+                    type,
+                    name,
+                    otype,
+                    level,
+                    count,
+                    customDefaultVal,
+                    parse,
+                    has_ex_checkers,
+                    is_json_parse_mode
+                );
                 newType.__inner__def_comment = comment;
                 newType.__inner_has_default_value = true;
                 return newType;
             },
-            __inner__def_comment: comment
+            __inner__def_comment: comment,
         };
     }
     def.Type = Type;
@@ -294,114 +394,299 @@ var def;
     function getRowDataByColumnName(columnName) {
         var cIdx = Internal.HeaderNameMap.get(columnName);
         if (cIdx === undefined) {
-            throw new Error("type extens checker failure. column name ".concat(columnName, " not found!"));
+            throw new Error(
+                'type extens checker failure. column name '.concat(columnName, ' not found!')
+            );
         }
         return Internal.RowData[cIdx];
     }
     def.getRowDataByColumnName = getRowDataByColumnName;
     // boolean checker
-    var BooleanFalseKeyMap = { 'false': false, '0': false, "null": false, undefined: false };
+    var BooleanFalseKeyMap = { false: false, 0: false, null: false, undefined: false };
     /**
      * integer range: [-127, 128]
      */
-    def.char = def.Type('char', 'char', 'base', 0, undefined, 0, function (data) { if (def.isNumber(data) && data >= -127 && data <= 128)
-        return +data;
-    else
-        throw "value: ".concat(data, " is not a number or between [-127, 128]"); }, false, false);
+    def.char = def.Type(
+        'char',
+        'char',
+        'base',
+        0,
+        undefined,
+        0,
+        function (data) {
+            if (def.isNumber(data) && data >= -127 && data <= 128) return +data;
+            else throw 'value: '.concat(data, ' is not a number or between [-127, 128]');
+        },
+        false,
+        false
+    );
     /**
      * integer range: [0, 255]
      */
-    def.uchar = def.Type('uchar', 'uchar', 'base', 0, undefined, 0, function (data) { if (def.isNumber(data) && data >= 0 && data <= 255)
-        return +data;
-    else
-        throw "value: ".concat(data, " is not a number or between [0, 255]"); }, false, false);
+    def.uchar = def.Type(
+        'uchar',
+        'uchar',
+        'base',
+        0,
+        undefined,
+        0,
+        function (data) {
+            if (def.isNumber(data) && data >= 0 && data <= 255) return +data;
+            else throw 'value: '.concat(data, ' is not a number or between [0, 255]');
+        },
+        false,
+        false
+    );
     /**
      * integer range: [-32767, 32768]
      */
-    def.short = def.Type('short', 'short', 'base', 0, undefined, 0, function (data) { if (def.isNumber(data) && data >= -32768 && data <= 32767)
-        return +data;
-    else
-        throw "value: ".concat(data, " is not a number or between [-32768, 32767]"); }, false, false);
+    def.short = def.Type(
+        'short',
+        'short',
+        'base',
+        0,
+        undefined,
+        0,
+        function (data) {
+            if (def.isNumber(data) && data >= -32768 && data <= 32767) return +data;
+            else throw 'value: '.concat(data, ' is not a number or between [-32768, 32767]');
+        },
+        false,
+        false
+    );
     /**
      * integer range: [0, 65535]
      */
-    def.ushort = def.Type('ushort', 'ushort', 'base', 0, undefined, 0, function (data) { if (def.isNumber(data) && data >= 0 && data <= 32768)
-        return +data;
-    else
-        throw "value: ".concat(data, " is not a number or between [0, 32768]"); }, false, false);
+    def.ushort = def.Type(
+        'ushort',
+        'ushort',
+        'base',
+        0,
+        undefined,
+        0,
+        function (data) {
+            if (def.isNumber(data) && data >= 0 && data <= 32768) return +data;
+            else throw 'value: '.concat(data, ' is not a number or between [0, 32768]');
+        },
+        false,
+        false
+    );
     /**
      * integer range: [-2147483648, 2147483647]
      */
-    def.int = def.Type('int', 'int', 'base', 0, undefined, 0, function (data) { if (def.isNumber(data) && data >= -2147483648 && data <= 2147483647)
-        return +data;
-    else
-        throw "value: ".concat(data, " is not a number or between [-2147483648, 2147483647]"); }, false, false);
+    def.int = def.Type(
+        'int',
+        'int',
+        'base',
+        0,
+        undefined,
+        0,
+        function (data) {
+            if (def.isNumber(data) && data >= -2147483648 && data <= 2147483647) return +data;
+            else
+                throw 'value: '.concat(
+                    data,
+                    ' is not a number or between [-2147483648, 2147483647]'
+                );
+        },
+        false,
+        false
+    );
     /**
      * integer range: [0, 4294967295]
      */
-    def.uint = def.Type('uint', 'uint', 'base', 0, undefined, 0, function (data) { if (def.isNumber(data) && data >= 0 && data <= 4294967295)
-        return +data;
-    else
-        throw "value: ".concat(data, " is not a number or between [0, 4294967295]"); }, false, false);
+    def.uint = def.Type(
+        'uint',
+        'uint',
+        'base',
+        0,
+        undefined,
+        0,
+        function (data) {
+            if (def.isNumber(data) && data >= 0 && data <= 4294967295) return +data;
+            else throw 'value: '.concat(data, ' is not a number or between [0, 4294967295]');
+        },
+        false,
+        false
+    );
     /**
      * integer range: [-9223372036854775808, 9223372036854775807]
      */
-    def.int64 = def.Type('int64', 'int64', 'base', 0, undefined, 0, function (data) { if (def.isNumber(data))
-        return +data;
-    else
-        throw "value: ".concat(data, " is not a number"); }, false, false);
+    def.int64 = def.Type(
+        'int64',
+        'int64',
+        'base',
+        0,
+        undefined,
+        0,
+        function (data) {
+            if (def.isNumber(data)) return +data;
+            else throw 'value: '.concat(data, ' is not a number');
+        },
+        false,
+        false
+    );
     /**
      * integer range: [0, 18446744073709551615]
      */
-    def.uint64 = def.Type('uint64', 'uint64', 'base', 0, undefined, 0, function (data) { if (def.isNumber(data) && data >= 0)
-        return +data;
-    else
-        throw "value: ".concat(data, " is not a number"); }, false, false);
+    def.uint64 = def.Type(
+        'uint64',
+        'uint64',
+        'base',
+        0,
+        undefined,
+        0,
+        function (data) {
+            if (def.isNumber(data) && data >= 0) return +data;
+            else throw 'value: '.concat(data, ' is not a number');
+        },
+        false,
+        false
+    );
     /**
      * string object. auto change 'line break' to '\n
      */
-    def.string = def.Type('string', 'string', 'base', 0, undefined, '', function (data) { var res = data.toString(); if (res == data)
-        return res; }, false, false);
+    def.string = def.Type(
+        'string',
+        'string',
+        'base',
+        0,
+        undefined,
+        '',
+        function (data) {
+            var res = data.toString();
+            if (res == data) return res;
+        },
+        false,
+        false
+    );
     /**
      * all number. no limit
      */
-    def.double = def.Type('double', 'double', 'base', 0, undefined, 0, function (data) { if (def.isNumber(data))
-        return (+data).toFixed(Internal.FractionDigitsFMT);
-    else
-        throw "value: ".concat(data, " is not a number"); }, false, false);
+    def.double = def.Type(
+        'double',
+        'double',
+        'base',
+        0,
+        undefined,
+        0,
+        function (data) {
+            if (def.isNumber(data)) return (+data).toFixed(Internal.FractionDigitsFMT);
+            else throw 'value: '.concat(data, ' is not a number');
+        },
+        false,
+        false
+    );
     /**
      * all number. no limit
      */
-    def.float = def.Type('float', 'float', 'base', 0, undefined, 0, function (data) {
-        if (def.isNumber(data))
-            return (+data).toFixed(Internal.FractionDigitsFMT);
-        else
-            throw "value: ".concat(data, " is not a number");
-    }, false, false);
+    def.float = def.Type(
+        'float',
+        'float',
+        'base',
+        0,
+        undefined,
+        0,
+        function (data) {
+            if (def.isNumber(data)) return (+data).toFixed(Internal.FractionDigitsFMT);
+            else throw 'value: '.concat(data, ' is not a number');
+        },
+        false,
+        false
+    );
     /**
      * true: 'true' or '1' false: 'false' empty or '0'
      */
-    def.bool = def.Type('bool', 'bool', 'base', 0, undefined, false, function (data) { var _a; return (_a = BooleanFalseKeyMap[data.toString().toLowerCase()]) !== null && _a !== void 0 ? _a : true; }, false, false);
+    def.bool = def.Type(
+        'bool',
+        'bool',
+        'base',
+        0,
+        undefined,
+        false,
+        function (data) {
+            var _a;
+            return (_a = BooleanFalseKeyMap[data.toString().toLowerCase()]) !== null &&
+                _a !== void 0
+                ? _a
+                : true;
+        },
+        false,
+        false
+    );
     /**
      * 	YYYY/MM/DD HH:mm:ss or see: config.DateFmt
      */
-    def.date = def.Type('date', 'date', 'base', 0, undefined, undefined, function (data) { var date = def.ParseDate(data); if (date)
-        return moment(date).format(Internal.DateFmt); }, false, false);
+    def.date = def.Type(
+        'date',
+        'date',
+        'base',
+        0,
+        undefined,
+        undefined,
+        function (data) {
+            var date = def.ParseDate(data);
+            if (date) return moment(date).format(Internal.DateFmt);
+        },
+        false,
+        false
+    );
     /**
      * YYYY/MM/DD or see config.TinyDateFmt
      */
-    def.tinydate = def.Type('tinydate', 'tinydate', 'base', 0, undefined, 0, function (data) { var date = def.ParseDate(data); if (date)
-        return moment(date).format(Internal.TinyDateFmt); }, false, false);
+    def.tinydate = def.Type(
+        'tinydate',
+        'tinydate',
+        'base',
+        0,
+        undefined,
+        0,
+        function (data) {
+            var date = def.ParseDate(data);
+            if (date) return moment(date).format(Internal.TinyDateFmt);
+        },
+        false,
+        false
+    );
     /**
      * Unix time stamp. use ms if config.TimeStampUseMS value is true
      */
-    def.timestamp = def.Type('timestamp', 'timestamp', 'base', 0, undefined, 0, function (data) { var date = def.ParseDate(data); if (date)
-        return Internal.TimeStampUseMS ? date.getTime() : Math.round(date.getTime() / 1000); }, false, false);
+    def.timestamp = def.Type(
+        'timestamp',
+        'timestamp',
+        'base',
+        0,
+        undefined,
+        0,
+        function (data) {
+            var date = def.ParseDate(data);
+            if (date)
+                return Internal.TimeStampUseMS ? date.getTime() : Math.round(date.getTime() / 1000);
+        },
+        false,
+        false
+    );
     /**
      * UTC time stamp. use ms if config.TimeStampUseMS value is true
      */
-    def.utctime = def.Type('utctime', 'utctime', 'base', 0, undefined, 0, function (data) { var date = def.ParseDate(data); if (date)
-        return Math.round((date.getTime() / 1000 + Internal.gTimeZoneOffset) * (Internal.TimeStampUseMS ? 1000 : 1)); }, false, false);
+    def.utctime = def.Type(
+        'utctime',
+        'utctime',
+        'base',
+        0,
+        undefined,
+        0,
+        function (data) {
+            var date = def.ParseDate(data);
+            if (date)
+                return Math.round(
+                    (date.getTime() / 1000 + Internal.gTimeZoneOffset) *
+                        (Internal.TimeStampUseMS ? 1000 : 1)
+                );
+        },
+        false,
+        false
+    );
     /**
      * @description all typeDefs here
      */
@@ -421,7 +706,7 @@ var def;
         date: def.date,
         tinydate: def.tinydate,
         timestamp: def.timestamp,
-        utctime: def.utctime
+        utctime: def.utctime,
     };
     // export function forTest() {
     //     const objTest1 = def.TObject({
@@ -439,7 +724,7 @@ var def;
     //         // __inner__name__abcxyz__: 2,
     //     });
     // }
-})(def = exports.def || (exports.def = {}));
+})((def = exports.def || (exports.def = {})));
 /**
  * internal function. please do not use it!
  */
@@ -450,38 +735,59 @@ var Internal;
     var CheckerBoundName = 'bound checkColumnContainsValueAndTranslate';
     function TryColumnTypeTranslate(type) {
         if (typeof type === 'function' && type.name == CheckerBoundName) {
-            var columnType = def.Type(type, "".concat(type.SheetName, ".").concat(type.ColumnName), 'column', 0, undefined, undefined, function (data) {
-                var value = type(data);
-                if (value == undefined) {
-                    throw new Error("data error, data: ".concat(data, " not in Sheet Column ").concat(type.SheetName, ".").concat(type.ColumnName, "."));
-                }
-                return value;
-            }, false, false);
+            var columnType = def.Type(
+                type,
+                ''.concat(type.SheetName, '.').concat(type.ColumnName),
+                'column',
+                0,
+                undefined,
+                undefined,
+                function (data) {
+                    var value = type(data);
+                    if (value === undefined) {
+                        throw new Error(
+                            'data error, data: '
+                                .concat(data, ' not in Sheet Column ')
+                                .concat(type.SheetName, '.')
+                                .concat(type.ColumnName, '.')
+                        );
+                    }
+                    return value;
+                },
+                false,
+                false
+            );
             gColumnTypeTranslate.push(columnType);
             return columnType;
         }
         return type;
     }
     Internal.TryColumnTypeTranslate = TryColumnTypeTranslate;
-    ;
     function initializeColumnTypeName() {
-        for (var _i = 0, gColumnTypeTranslate_1 = gColumnTypeTranslate; _i < gColumnTypeTranslate_1.length; _i++) {
+        for (
+            var _i = 0, gColumnTypeTranslate_1 = gColumnTypeTranslate;
+            _i < gColumnTypeTranslate_1.length;
+            _i++
+        ) {
             var columnType = gColumnTypeTranslate_1[_i];
-            columnType.__inner__name__abcxyz__ = (columnType.__inner__type__abcxyz__).Header.parser.type.__inner__name__abcxyz__;
+            columnType.__inner__name__abcxyz__ =
+                columnType.__inner__type__abcxyz__.Header.parser.type.__inner__name__abcxyz__;
         }
     }
     Internal.initializeColumnTypeName = initializeColumnTypeName;
-})(Internal = exports.Internal || (exports.Internal = {}));
+})((Internal = exports.Internal || (exports.Internal = {})));
 //#region get comment method
 /**
  * 获取文件和行号信息
  */
 function GetFileLineInfo(deep) {
     var _a;
-    if (deep === void 0) { deep = 2; }
+    if (deep === void 0) {
+        deep = 2;
+    }
     var err = new Error('');
     var stacks = (_a = err.stack) === null || _a === void 0 ? void 0 : _a.split('\n');
-    if (stacks == undefined) {
+    if (stacks === undefined) {
         error('get function file: line info failure!');
         return undefined;
     }
@@ -491,38 +797,40 @@ function GetFileLineInfo(deep) {
         var s = stacks[i].trim();
         if (s.startsWith('at Object.TryColumnTypeTranslate')) {
             continue;
-        }
-        else if (s.startsWith('at Type') || s.startsWith('at Object.Type')) {
+        } else if (s.startsWith('at Type') || s.startsWith('at Object.Type')) {
             otype = 'base';
             continue;
-        }
-        else if (s.startsWith('at Object.TArray')) {
+        } else if (s.startsWith('at Object.TArray')) {
             otype = 'array';
             continue;
-        }
-        else if (s.startsWith('at Object.TEnum')) {
+        } else if (s.startsWith('at Object.TEnum')) {
             otype = 'enum';
             continue;
-        }
-        else if (s.startsWith('at Object.TObject') || s.startsWith('at Object.TJson')) {
+        } else if (s.startsWith('at Object.TObject') || s.startsWith('at Object.TJson')) {
             otype = 'object';
             continue;
-        }
-        else if (s.startsWith('at Object.TCustom')) {
+        } else if (s.startsWith('at Object.TCustom')) {
             otype = 'base';
             continue;
         }
         info = s;
         break;
     }
-    if (info == undefined) {
-        debug('!!! inner error! get function file: line info failure. outter function stack not found !!!');
+    if (info === undefined) {
+        debug(
+            '!!! inner error! get function file: line info failure. outter function stack not found !!!'
+        );
         return undefined;
     }
     var sfileline = info;
     // has `(` and `)`
     if (sfileline.indexOf('(') < 0 || sfileline.indexOf(')') < 0) {
-        debug("stack format error: ".concat(sfileline, ". expect: at Object.Function (FILE:LINE:column)"));
+        debug(
+            'stack format error: '.concat(
+                sfileline,
+                '. expect: at Object.Function (FILE:LINE:column)'
+            )
+        );
         return undefined;
     }
     sfileline = info.substring(info.indexOf('(') + 1);
@@ -534,7 +842,13 @@ function GetFileLineInfo(deep) {
     var line = parseInt(sfileline.substring(lineIdx + 1));
     var file = sfileline.substring(0, lineIdx);
     var res = { file: file, line: line, column: column, otype: otype };
-    debug("---------- [".concat(otype, "]  ").concat(file, ":").concat(line, ":").concat(column, " ----------"));
+    debug(
+        '---------- ['
+            .concat(otype, ']  ')
+            .concat(file, ':')
+            .concat(line, ':')
+            .concat(column, ' ----------')
+    );
     return res;
 }
 /**
@@ -542,21 +856,25 @@ function GetFileLineInfo(deep) {
  */
 function GetTypeComment() {
     var fl = GetFileLineInfo(3);
-    if (fl == undefined) {
-        debug("!!!get file line info failure!!!");
+    if (fl === undefined) {
+        debug('!!!get file line info failure!!!');
         return;
     }
-    if (FileCache[fl.file] == undefined) {
+    if (FileCache[fl.file] === undefined) {
         try {
-            var ctx = fs.readFileSync(fl.file.replace(/\\/g, '/'), { encoding: 'utf-8', flag: 'r' });
-            if (ctx == undefined) {
-                debug("!!!get type comment failure because read file: ".concat(fl.file, " failure!!!"));
+            var ctx = fs.readFileSync(fl.file.replace(/\\/g, '/'), {
+                encoding: 'utf-8',
+                flag: 'r',
+            });
+            if (ctx === undefined) {
+                debug(
+                    '!!!get type comment failure because read file: '.concat(fl.file, ' failure!!!')
+                );
                 return undefined;
             }
             FileCache[fl.file] = ctx;
-        }
-        catch (ex) {
-            debug("!!!get type comment failure because read file: ".concat(fl.file, " failure!!!"));
+        } catch (ex) {
+            debug('!!!get type comment failure because read file: '.concat(fl.file, ' failure!!!'));
             error(JSON.stringify(ex));
         }
     }
@@ -564,7 +882,7 @@ function GetTypeComment() {
     var lines = content.split('\n');
     var line = fl.line - 1;
     if (line >= lines.length) {
-        debug("line: ".concat(line, " but file lines.length: ").concat(lines.length));
+        debug('line: '.concat(line, ' but file lines.length: ').concat(lines.length));
         return;
     }
     // get comment before
@@ -573,17 +891,26 @@ function GetTypeComment() {
     debug(self.toString());
     debug('>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
     var childrenComment = GetChildComment(lines, line, fl.otype);
-    return { self: self, children: childrenComment === null || childrenComment === void 0 ? void 0 : childrenComment.children, tail: childrenComment === null || childrenComment === void 0 ? void 0 : childrenComment.tail };
+    return {
+        self: self,
+        children:
+            childrenComment === null || childrenComment === void 0
+                ? void 0
+                : childrenComment.children,
+        tail:
+            childrenComment === null || childrenComment === void 0 ? void 0 : childrenComment.tail,
+    };
 }
 function TryGetComment(line) {
     line = line.trim();
-    if (line.startsWith('*')) { // 匹配 "*/" 或者 "* xxxx" 模式
-        return " ".concat(line);
-    }
-    else if (line.startsWith('//')) { // 匹配 "//" 或者 "///" 模式
+    if (line.startsWith('*')) {
+        // 匹配 "*/" 或者 "* xxxx" 模式
+        return ' '.concat(line);
+    } else if (line.startsWith('//')) {
+        // 匹配 "//" 或者 "///" 模式
         return line;
-    }
-    else if (line.startsWith('/*')) { // 匹配 "/*" 开头
+    } else if (line.startsWith('/*')) {
+        // 匹配 "/*" 开头
         return line;
     }
     return undefined;
@@ -592,8 +919,7 @@ function GetSelfComment(lines, line, column) {
     var comment = [];
     for (var i = line - 1; i > -1; --i) {
         var cmt = TryGetComment(lines[i]);
-        if (cmt == undefined)
-            break;
+        if (cmt === undefined) break;
         comment.push(cmt);
         continue;
     }
@@ -609,7 +935,7 @@ function GetChildComment(lines, line, otype) {
         case 'object':
             return GetEnumOrObjectChildComment(lines, line);
     }
-    error("type ".concat(otype, " not found!"));
+    error('type '.concat(otype, ' not found!'));
     return undefined;
 }
 function GetEnumOrObjectChildComment(lines, line) {
@@ -622,24 +948,23 @@ function GetEnumOrObjectChildComment(lines, line) {
     var comment = [];
     for (var i = line + 1; i < lines.length; ++i) {
         var cmt = TryGetComment(lines[i]);
-        if (cmt != undefined) {
+        if (cmt !== undefined) {
             comment.push(cmt);
             continue;
         }
         if (lines[i].indexOf('}') >= 0) {
-            if (res != undefined) {
+            if (res !== undefined) {
                 res.tail = comment;
             }
             return res;
         }
         // get child name
         var childname = TryGetChildName(lines[i]);
-        if (childname == undefined || comment.length <= 0) {
+        if (childname === undefined || comment.length <= 0) {
             comment = [];
             continue;
         }
-        if (res == undefined)
-            res = { children: {} };
+        if (res === undefined) res = { children: {} };
         res.children[childname] = comment;
         comment = [];
         continue;
@@ -654,7 +979,7 @@ function TryGetChildName(line) {
     line = line.trim();
     var idx = line.indexOf(':');
     if (idx <= 0) {
-        error("get type child name failure. ctx: ".concat(line));
+        error('get type child name failure. ctx: '.concat(line));
         return undefined;
     }
     return line.substring(0, idx);

@@ -1,0 +1,89 @@
+name: Release
+
+on:
+    push:
+        tags:
+            - 'v*.*.*'
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Use Node.js 14.x
+              uses: actions/setup-node@v2
+              with:
+                  node-version: 14.x
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Test
+              run: npm test
+
+            - name: Build
+              run: npm run build
+
+            - name: Build binaries
+              run: npm run pkg
+
+            - name: Create Release
+              id: create_release
+              uses: actions/create-release@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  tag_name: ${{ github.ref }}
+                  release_name: Release ${{ github.ref }}
+                  draft: false
+                  prerelease: false
+
+            - name: Upload Windows Binary
+              uses: actions/upload-release-asset@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path: ./bin/excel-game-tools-win.exe
+                  asset_name: excel-game-tools-win.exe
+                  asset_content_type: application/octet-stream
+
+            - name: Upload Linux Binary
+              uses: actions/upload-release-asset@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path: ./bin/excel-game-tools-linux
+                  asset_name: excel-game-tools-linux
+                  asset_content_type: application/octet-stream
+
+            - name: Upload macOS Binary
+              uses: actions/upload-release-asset@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path: ./bin/excel-game-tools-macos
+                  asset_name: excel-game-tools-macos
+                  asset_content_type: application/octet-stream
+
+            - name: Setup npm authentication
+              run: echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+            - name: Publish to npm
+              run: npm publish
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+            - name: Publish to GitHub Packages
+              uses: actions/setup-node@v2
+              with:
+                  node-version: 14.x
+                  registry-url: 'https://npm.pkg.github.com'
+                  scope: '@yhchen'
+            - run: npm publish
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

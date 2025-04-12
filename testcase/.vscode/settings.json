@@ -20,10 +20,10 @@
         "**/*.js": true,
         "package.json": true,
         ".vscode": true,
-        "tsconfig.json": true,
+        "tsconfig.json": true
     },
     "editor.snippetSuggestions": "bottom",
     "javascript.format.semicolons": "insert",
     "typescript.format.semicolons": "insert",
-    "files.eol": "\n",
+    "files.eol": "\n"
 }

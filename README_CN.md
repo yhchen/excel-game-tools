@@ -5,27 +5,32 @@
 这是一个高效的 Excel/CSV 配置导出工具，专为游戏开发者设计，用于将 Excel 表格数据导出为多种格式（JSON、JS、Lua、Protobuf 等），并提供强大的类型检查功能，确保游戏配置数据的正确性和一致性。
 
 主要特点：
-- 支持导出为多种格式：JSON、JS、Lua、Protocol Buffers 等
-- 强大的类型检查系统，支持基本类型、数组、对象、枚举等
-- 支持自定义类型定义和验证规则
-- 支持 Excel 和 CSV 文件格式
-- 支持数据引用和关联检查
-- 高性能处理大型配置文件
+
+-   支持导出为多种格式：JSON、JS、Lua、Protocol Buffers 等
+-   强大的类型检查系统，支持基本类型、数组、对象、枚举等
+-   支持自定义类型定义和验证规则
+-   支持 Excel 和 CSV 文件格式
+-   支持数据引用和关联检查
+-   高性能处理大型配置文件
 
 ## 安装和环境配置
 
 ### 环境要求
-- Node.js 环境
-- TypeScript 支持
+
+-   Node.js 环境
+-   TypeScript 支持
 
 ### 安装步骤
 
 1. 克隆或下载项目代码
 2. 安装依赖包：
+
 ```bash
 npm install
 ```
+
 3. 编译项目：
+
 ```bash
 npm run build
 ```
@@ -36,6 +41,7 @@ npm run build
 2. 创建配置文件 `config.json`，设置导入和导出选项
 3. 编写类型定义文件（如 `typeDef.ts`）
 4. 运行导出命令：
+
 ```bash
 node dist/index.js -c config.json -t typeDef.js
 ```
@@ -49,24 +55,24 @@ Excel 表格需要按照以下结构组织：
 1. **表名行**：第一行为表名，A1 单元格通常为表格的标识符
 2. **分组过滤行**（可选）：以 `$` 开头的行，用于设置列的分组
 3. **列名行**：定义每列的名称，必须是有效的标识符（字母、数字、下划线）
-4. **类型行**：定义每列的数据类型，A列通常为 `*` 标记
+4. **类型行**：定义每列的数据类型，A 列通常为 `*` 标记
 5. **数据行**：实际的配置数据
 
 ### 特殊标记规则
 
-- 文件名或表名以 `!` `#` `.` `~$` `$` 开头的会被忽略
-- 列名以 `#` 开头表示注释列，不会被导出
-- 行首单元格（A列）以 `#` 开头表示注释行，不会被导出
+-   文件名或表名以 `!` `#` `.` `~$` `$` 开头的会被忽略
+-   列名以 `#` 开头表示注释列，不会被导出
+-   行首单元格（A 列）以 `#` 开头表示注释行，不会被导出
 
 ### 示例表格
 
-| *      | Id    | Name   | Type  | Value | Desc   |
-|--------|-------|--------|-------|-------|--------|
-| $      | *     | *      | *     | *     | *      |
-| *      | int<!!;!0> | string<!N> | int   | float  | string |
-| #注释行 |       |        |       |       |        |
-|        | 1001  | 物品1   | 1     | 10.5  | 这是物品1 |
-|        | 1002  | 物品2   | 2     | 20.3  | 这是物品2 |
+| \*      | Id         | Name       | Type | Value | Desc       |
+| ------- | ---------- | ---------- | ---- | ----- | ---------- |
+| $       | \*         | \*         | \*   | \*    | \*         |
+| \*      | int<!!;!0> | string<!N> | int  | float | string     |
+| #注释行 |            |            |      |       |            |
+|         | 1001       | 物品 1     | 1    | 10.5  | 这是物品 1 |
+|         | 1002       | 物品 2     | 2    | 20.3  | 这是物品 2 |
 
 ### 分组过滤行详解
 
@@ -74,15 +80,16 @@ Excel 表格需要按照以下结构组织：
 
 例如：
 
-| *      | Id    | Name   | Type  | Value | Desc   |
-|--------|-------|--------|-------|-------|--------|
-| $      | *     | S      | C     | *     | *      |
+| \*  | Id  | Name | Type | Value | Desc |
+| --- | --- | ---- | ---- | ----- | ---- |
+| $   | \*  | S    | C    | \*    | \*   |
 
 上面的配置表示：
-- `Id` 列属于所有分组（`*`）
-- `Name` 列仅属于服务端分组（`S`）
-- `Type` 列仅属于客户端分组（`C`）
-- `Value` 和 `Desc` 列属于所有分组（`*`）
+
+-   `Id` 列属于所有分组（`*`）
+-   `Name` 列仅属于服务端分组（`S`）
+-   `Type` 列仅属于客户端分组（`C`）
+-   `Value` 和 `Desc` 列属于所有分组（`*`）
 
 在导出配置中，如果设置 `"GroupFilter": ["C"]`，则只会导出 `Id`、`Type`、`Value` 和 `Desc` 列。
 
@@ -90,39 +97,40 @@ Excel 表格需要按照以下结构组织：
 
 ### 基本类型
 
-| 类型 | 描述 | 取值范围 |
-|------|------|---------|
-| `char` | 有符号字符 | -127 ~ 127 |
-| `uchar` | 无符号字符 | 0 ~ 255 |
-| `short` | 有符号短整型 | -32768 ~ 32767 |
-| `ushort` | 无符号短整型 | 0 ~ 65535 |
-| `int` | 有符号整型 | -2147483648 ~ 2147483647 |
-| `uint` | 无符号整型 | 0 ~ 4294967295 |
-| `int64` | 有符号长整型 | -9223372036854775808 ~ 9223372036854775807 |
-| `uint64` | 无符号长整型 | 0 ~ 18446744073709551615 |
-| `string` | 字符串 | 自动将换行符转换为 '\n' |
-| `double` | 双精度浮点数 | 无限制 |
-| `float` | 单精度浮点数 | 无限制 |
-| `bool` | 布尔值 | true: 'true'或'1'，false: 'false'、空值或'0' |
-| `date` | 日期时间 | YYYY/MM/DD HH:mm:ss |
-| `tinydate` | 日期 | YYYY/MM/DD |
-| `timestamp` | 时间戳 | Linux 时间戳 |
-| `utctime` | UTC 时间戳 | UTC 时间戳 |
+| 类型        | 描述         | 取值范围                                     |
+| ----------- | ------------ | -------------------------------------------- |
+| `char`      | 有符号字符   | -127 ~ 127                                   |
+| `uchar`     | 无符号字符   | 0 ~ 255                                      |
+| `short`     | 有符号短整型 | -32768 ~ 32767                               |
+| `ushort`    | 无符号短整型 | 0 ~ 65535                                    |
+| `int`       | 有符号整型   | -2147483648 ~ 2147483647                     |
+| `uint`      | 无符号整型   | 0 ~ 4294967295                               |
+| `int64`     | 有符号长整型 | -9223372036854775808 ~ 9223372036854775807   |
+| `uint64`    | 无符号长整型 | 0 ~ 18446744073709551615                     |
+| `string`    | 字符串       | 自动将换行符转换为 '\n'                      |
+| `double`    | 双精度浮点数 | 无限制                                       |
+| `float`     | 单精度浮点数 | 无限制                                       |
+| `bool`      | 布尔值       | true: 'true'或'1'，false: 'false'、空值或'0' |
+| `date`      | 日期时间     | YYYY/MM/DD HH:mm:ss                          |
+| `tinydate`  | 日期         | YYYY/MM/DD                                   |
+| `timestamp` | 时间戳       | Linux 时间戳                                 |
+| `utctime`   | UTC 时间戳   | UTC 时间戳                                   |
 
 ### 组合类型
 
-| 类型 | 描述 |
-|------|------|
+| 类型                  | 描述                                                              |
+| --------------------- | ----------------------------------------------------------------- |
 | `<type>[<N> or null]` | 数组类型，`<type>` 为基本类型或组合类型，`<N>` 为数组长度（可选） |
-| `vector2` | 等同于 `float[2]`，常用于表示二维坐标 |
-| `vector3` | 等同于 `float[3]`，常用于表示三维坐标 |
+| `vector2`             | 等同于 `float[2]`，常用于表示二维坐标                             |
+| `vector3`             | 等同于 `float[3]`，常用于表示三维坐标                             |
 
 ### 数组格式
 
 数组使用分隔符来区分不同层级：
-- 第一级分隔符：`;`（可在配置中修改）
-- 第二级分隔符：`/`（可在配置中修改）
-- 第三级分隔符：`\n`（可在配置中修改）
+
+-   第一级分隔符：`;`（可在配置中修改）
+-   第二级分隔符：`/`（可在配置中修改）
+-   第三级分隔符：`\n`（可在配置中修改）
 
 例如，对于类型 `int[][]`，数据 `1;2/3;4;5` 表示 `[[1,2,3], [4,5]]`。
 
@@ -131,30 +139,36 @@ Excel 表格需要按照以下结构组织：
 #### 数组示例
 
 1. 一维数组 `int[]`：
-   ```
-   1;2;3;4;5
-   ```
-   解析结果：`[1, 2, 3, 4, 5]`
+
+    ```
+    1;2;3;4;5
+    ```
+
+    解析结果：`[1, 2, 3, 4, 5]`
 
 2. 二维数组 `int[][]`：
-   ```
-   1;2/3;4;5/6
-   ```
-   解析结果：`[[1, 2], [3, 4, 5], [6]]`
+
+    ```
+    1;2/3;4;5/6
+    ```
+
+    解析结果：`[[1, 2], [3, 4, 5], [6]]`
 
 3. 三维数组 `int[][][]`：
-   ```
-   1/2
-   3;4/5
-   6;7;8
-   ```
-   解析结果：`[[[1], [2]], [[3, 4], [5]], [[6, 7, 8]]]`
+
+    ```
+    1/2
+    3;4/5
+    6;7;8
+    ```
+
+    解析结果：`[[[1], [2]], [[3, 4], [5]], [[6, 7, 8]]]`
 
 4. 固定长度数组 `int[3]`：
-   ```
-   1;2;3
-   ```
-   解析结果：`[1, 2, 3]`（如果元素数量不等于3，会报错）
+    ```
+    1;2;3
+    ```
+    解析结果：`[1, 2, 3]`（如果元素数量不等于 3，会报错）
 
 ### 列验证器详解
 
@@ -162,41 +176,44 @@ Excel 表格需要按照以下结构组织：
 
 #### 基本验证器
 
-- `<!!>` : 唯一值验证器
-  - 确保该列中的所有值都是唯一的，不允许重复
-  - 常用于 ID 列或其他需要唯一标识的字段
-  - 示例：`int<!!>`
+-   `<!!>` : 唯一值验证器
 
-- `<!N>` : 非空验证器
-  - 确保该列的值不能为空
-  - 适用于必填字段
-  - 示例：`string<!N>`
+    -   确保该列中的所有值都是唯一的，不允许重复
+    -   常用于 ID 列或其他需要唯一标识的字段
+    -   示例：`int<!!>`
 
-- `<!0>` : 非零验证器
-  - 确保该列的值不能为 0
-  - 适用于不允许为零的数值字段，如物品数量、倍率等
-  - 示例：`int<!0>`
+-   `<!N>` : 非空验证器
+
+    -   确保该列的值不能为空
+    -   适用于必填字段
+    -   示例：`string<!N>`
+
+-   `<!0>` : 非零验证器
+    -   确保该列的值不能为 0
+    -   适用于不允许为零的数值字段，如物品数量、倍率等
+    -   示例：`int<!0>`
 
 #### 组合验证器
 
 可以组合使用多个验证器，用分号 `;` 分隔：
 
-- `int<!!;!0>` : 值必须唯一且不能为 0
-- `string<!N;!!>` : 值不能为空且必须唯一
+-   `int<!!;!0>` : 值必须唯一且不能为 0
+-   `string<!N;!!>` : 值不能为空且必须唯一
 
 #### 验证器使用示例
 
-| *      | Id           | Name        | Count      | Rate       |
-|--------|--------------|-------------|------------|------------|
-| *      | int<!!;!0>   | string<!N>  | int<!0>    | float      |
-|        | 1001         | 物品1        | 10         | 1.5        |
-|        | 1002         | 物品2        | 5          | 0.8        |
+| \*  | Id         | Name       | Count   | Rate  |
+| --- | ---------- | ---------- | ------- | ----- |
+| \*  | int<!!;!0> | string<!N> | int<!0> | float |
+|     | 1001       | 物品 1     | 10      | 1.5   |
+|     | 1002       | 物品 2     | 5       | 0.8   |
 
 在上面的示例中：
-- `Id` 列的值必须唯一且不能为 0
-- `Name` 列的值不能为空
-- `Count` 列的值不能为 0
-- `Rate` 列没有特殊验证
+
+-   `Id` 列的值必须唯一且不能为 0
+-   `Name` 列的值不能为空
+-   `Count` 列的值不能为 0
+-   `Rate` 列没有特殊验证
 
 ### 复合类型详解
 
@@ -207,6 +224,7 @@ Excel 表格需要按照以下结构组织：
 对象类型用于表示具有多个属性的复杂数据结构。在 Excel 中，对象类型通常使用分隔符分隔各个属性值。
 
 **定义方式**：
+
 ```typescript
 typeDefs.Position = def.TObject({
     x: int,
@@ -217,9 +235,11 @@ typeDefs.Position = def.TObject({
 ```
 
 **Excel 中的使用**：
+
 ```
 10;20;100;50
 ```
+
 解析结果：`{ x: 10, y: 20, width: 100, height: 50 }`
 
 #### 嵌套对象
@@ -235,16 +255,19 @@ typeDefs.Character = def.TObject({
         hp: int,
         mp: int,
         attack: int,
-        defense: int
-    })
+        defense: int,
+    }),
 });
 ```
 
 **Excel 中的使用**：
+
 ```
 1001;英雄;10;20;100;50;1000;500;80;60
 ```
+
 解析结果：
+
 ```json
 {
     "id": 1001,
@@ -259,19 +282,22 @@ typeDefs.Character = def.TObject({
 对象类型可以添加自定义验证函数：
 
 ```typescript
-typeDefs.Award = def.TObject({
-    type: EItemType,
-    id: int,
-    count: int64,
-}, function (data) {
-    // 根据类型验证 id 是否存在于对应表中
-    switch (data.type) {
-        case EItemType.Equip:
-            return Sheets.Equip.id(data.id);
-        case EItemType.Item:
-            return Sheets.Item.id(data.id);
+typeDefs.Award = def.TObject(
+    {
+        type: EItemType,
+        id: int,
+        count: int64,
+    },
+    function (data) {
+        // 根据类型验证 id 是否存在于对应表中
+        switch (data.type) {
+            case EItemType.Equip:
+                return Sheets.Equip.id(data.id);
+            case EItemType.Item:
+                return Sheets.Item.id(data.id);
+        }
     }
-});
+);
 ```
 
 #### 枚举类型
@@ -279,16 +305,17 @@ typeDefs.Award = def.TObject({
 枚举类型用于表示一组命名常量：
 
 ```typescript
-const EItemType = typeDefs.EItemType = def.TEnum({
+const EItemType = (typeDefs.EItemType = def.TEnum({
     Invalid: 0,
-    Item: 1,    // 普通物品
-    Equip: 2,   // 装备
-    Pet: 101,   // 宠物
-});
+    Item: 1, // 普通物品
+    Equip: 2, // 装备
+    Pet: 101, // 宠物
+}));
 ```
 
 **Excel 中的使用**：
 可以使用枚举的名称或值：
+
 ```
 Item    // 或者直接使用 1
 ```
@@ -315,13 +342,14 @@ typeDefs.Equipment = def.TObject({
 
 ```typescript
 // 定义 JSON 对象类型
-const KVJson = typeDefs.KVJson = def.TJson({
-    key: int.DVAL(1),  // 默认值为 1
+const KVJson = (typeDefs.KVJson = def.TJson({
+    key: int.DVAL(1), // 默认值为 1
     value: int,
-});
+}));
 ```
 
 **Excel 中的使用**：
+
 ```
 {"key": 5, "value": 100}
 ```
@@ -332,12 +360,12 @@ const KVJson = typeDefs.KVJson = def.TJson({
 
 ```typescript
 // 定义枚举类型
-const EItemType = typeDefs.EItemType = def.TEnum({
+const EItemType = (typeDefs.EItemType = def.TEnum({
     Invalid: 0,
-    Item: 1,    // 普通物品
-    Equip: 2,   // 装备
-    Pet: 101,   // 宠物
-});
+    Item: 1, // 普通物品
+    Equip: 2, // 装备
+    Pet: 101, // 宠物
+}));
 
 // 定义对象类型
 typeDefs.Position = def.TObject({
@@ -354,19 +382,22 @@ typeDefs.Vector3 = def.TArray(float, 3);
 typeDefs.EquipId = Sheets.Equip.id;
 
 // 定义带验证的复杂类型
-typeDefs.Award = def.TObject({
-    type: EItemType,
-    id: int,
-    count: int64,
-}, function (data) {
-    // 根据类型验证 id 是否存在于对应表中
-    switch (data.type) {
-        case EItemType.Equip:
-            return Sheets.Equip.id(data.id);
-        case EItemType.Item:
-            return Sheets.Item.id(data.id);
+typeDefs.Award = def.TObject(
+    {
+        type: EItemType,
+        id: int,
+        count: int64,
+    },
+    function (data) {
+        // 根据类型验证 id 是否存在于对应表中
+        switch (data.type) {
+            case EItemType.Equip:
+                return Sheets.Equip.id(data.id);
+            case EItemType.Item:
+                return Sheets.Item.id(data.id);
+        }
     }
-});
+);
 ```
 
 ### 默认值设置
@@ -396,28 +427,28 @@ typeDefs.Item = def.TObject({
 ```json
 {
     "IncludeFilesAndPath": [
-        "./testcase"  // 要处理的文件和目录
+        "./testcase" // 要处理的文件和目录
     ],
     "GroupMap": {
-        "*": "(All) Default value",  // 默认分组
-        "A": "Server And Client",    // 服务端和客户端
-        "S": "Server",               // 仅服务端
-        "C": "Client"                // 仅客户端
+        "*": "(All) Default value", // 默认分组
+        "A": "Server And Client", // 服务端和客户端
+        "S": "Server", // 仅服务端
+        "C": "Client" // 仅客户端
     },
     "Export": [
         {
-            "type": "json",                  // 导出类型
-            "OutputDir": "./exports/json/",  // 输出目录
-            "GroupFilter": ["C"],            // 分组过滤
-            "UseDefaultValueIfEmpty": false  // 空值是否使用默认值
-        },
+            "type": "json", // 导出类型
+            "OutputDir": "./exports/json/", // 输出目录
+            "GroupFilter": ["C"], // 分组过滤
+            "UseDefaultValueIfEmpty": false // 空值是否使用默认值
+        }
         // 可以配置多个导出目标
     ],
-    "DateFmt": "YYYY/MM/DD HH:mm:ss",  // 日期格式
-    "TinyDateFmt": "YYYY/MM/DD",       // 简短日期格式
-    "TypeCheckerJSFilePath": "./typeDef",  // 类型定义文件路径
-    "EnableDebugOutput": true,         // 是否启用调试输出
-    "ArraySpliter": [",", ";", "\n"]   // 数组分隔符
+    "DateFmt": "YYYY/MM/DD HH:mm:ss", // 日期格式
+    "TinyDateFmt": "YYYY/MM/DD", // 简短日期格式
+    "TypeCheckerJSFilePath": "./typeDef", // 类型定义文件路径
+    "EnableDebugOutput": true, // 是否启用调试输出
+    "ArraySpliter": [",", ";", "\n"] // 数组分隔符
 }
 ```
 
@@ -467,13 +498,13 @@ typeDefs.Item = def.TObject({
 
 #### 其他配置项
 
-- `DateFmt`：日期格式，默认为 `"YYYY/MM/DD HH:mm:ss"`
-- `TinyDateFmt`：简短日期格式，默认为 `"YYYY/MM/DD"`
-- `TypeCheckerJSFilePath`：类型定义文件路径
-- `EnableDebugOutput`：是否启用调试输出
-- `ArraySpliter`：数组分隔符，默认为 `[",", ";", "\n"]`
-- `TimeStampUseMS`：时间戳是否使用毫秒，默认为 `true`
-- `FractionDigitsFMT`：小数位数格式，默认为 `6`
+-   `DateFmt`：日期格式，默认为 `"YYYY/MM/DD HH:mm:ss"`
+-   `TinyDateFmt`：简短日期格式，默认为 `"YYYY/MM/DD"`
+-   `TypeCheckerJSFilePath`：类型定义文件路径
+-   `EnableDebugOutput`：是否启用调试输出
+-   `ArraySpliter`：数组分隔符，默认为 `[",", ";", "\n"]`
+-   `TimeStampUseMS`：时间戳是否使用毫秒，默认为 `true`
+-   `FractionDigitsFMT`：小数位数格式，默认为 `6`
 
 ## 导出格式说明
 
@@ -482,13 +513,14 @@ typeDefs.Item = def.TObject({
 ```json
 {
     "type": "json",
-    "OutputDir": "./exports/json/",  // 目录则每个表单独导出，文件则合并导出
-    "GroupFilter": ["C"],            // 分组过滤
-    "UseDefaultValueIfEmpty": false  // 空值是否使用默认值
+    "OutputDir": "./exports/json/", // 目录则每个表单独导出，文件则合并导出
+    "GroupFilter": ["C"], // 分组过滤
+    "UseDefaultValueIfEmpty": false // 空值是否使用默认值
 }
 ```
 
 导出结果示例：
+
 ```json
 {
     "1001": {
@@ -513,28 +545,29 @@ typeDefs.Item = def.TObject({
 {
     "type": "js",
     "OutputDir": "./exports/js/",
-    "ExportTemple": "export const {name}={data}",  // 导出模板
+    "ExportTemple": "export const {name}={data}", // 导出模板
     "GroupFilter": ["S", "C", "*"]
 }
 ```
 
 导出结果示例：
+
 ```javascript
-export const Item={
-    "1001": {
-        "id": 1001,
-        "name": "物品1",
-        "type": 1,
-        "value": 10.5
+export const Item = {
+    1001: {
+        id: 1001,
+        name: '物品1',
+        type: 1,
+        value: 10.5,
     },
-    "1002": {
-        "id": 1002,
-        "name": "物品2",
-        "type": 2,
-        "value": 20.3
+    1002: {
+        id: 1002,
+        name: '物品2',
+        type: 2,
+        value: 20.3,
     },
-    "_ids": [1001, 1002]
-}
+    _ids: [1001, 1002],
+};
 ```
 
 ### Lua 格式
@@ -544,11 +577,12 @@ export const Item={
     "type": "lua",
     "OutputDir": "./exports/lua/",
     "ExportTemple": "local {name} = {data}\n\nreturn {name}",
-    "UseShortName": true  // 是否使用短名称压缩键名
+    "UseShortName": true // 是否使用短名称压缩键名
 }
 ```
 
 导出结果示例（使用短名称）：
+
 ```lua
 local Item = {
     [1001] = {
@@ -574,14 +608,15 @@ return Item
 ```json
 {
     "type": "proto3",
-    "OutputDir": "./exports/proto3.proto",      // 输出协议文件
-    "OutputDataDir": "./exports/proto3-data/",  // 输出数据文件
-    "Namespace": "GameConfig",                  // 命名空间
-    "ARRAY_ELEMENT_NAME": "list"                // 数组元素名称
+    "OutputDir": "./exports/proto3.proto", // 输出协议文件
+    "OutputDataDir": "./exports/proto3-data/", // 输出数据文件
+    "Namespace": "GameConfig", // 命名空间
+    "ARRAY_ELEMENT_NAME": "list" // 数组元素名称
 }
 ```
 
 导出结果示例（协议文件）：
+
 ```protobuf
 syntax = "proto3";
 package GameConfig;
@@ -612,6 +647,7 @@ message ItemCategory {
 ```
 
 导出结果示例：
+
 ```csharp
 using System;
 using ETModel;
@@ -626,16 +662,16 @@ namespace GameConfig
     {
         [ProtoMember(1)]
         private int _id;
-        
+
         [ProtoMember(2)]
         public string Name { get; set; }
-        
+
         [ProtoMember(3)]
         public int Type { get; set; }
-        
+
         [ProtoMember(4)]
         public float Value { get; set; }
-        
+
         public int Id
         {
             get { return _id; }
@@ -652,31 +688,35 @@ node dist/index.js [options...]
 ```
 
 选项：
-- `-c` : 配置文件路径
-- `-t` : 类型定义文件路径
-- `--debug-output` : 1 启用调试输出，0 关闭调试输出
+
+-   `-c` : 配置文件路径
+-   `-t` : 类型定义文件路径
+-   `--debug-output` : 1 启用调试输出，0 关闭调试输出
 
 ## 最佳实践
 
 ### 游戏配置数据组织
 
 1. **合理规划表格结构**：
-   - 将相关配置放在同一个表格中
-   - 使用有意义的列名和注释
-   - 为重要字段添加验证器
+
+    - 将相关配置放在同一个表格中
+    - 使用有意义的列名和注释
+    - 为重要字段添加验证器
 
 2. **使用类型定义增强数据验证**：
-   - 定义枚举类型规范化常量值
-   - 使用对象类型组织复杂数据
-   - 添加自定义验证函数处理复杂业务逻辑
+
+    - 定义枚举类型规范化常量值
+    - 使用对象类型组织复杂数据
+    - 添加自定义验证函数处理复杂业务逻辑
 
 3. **利用分组功能分离数据**：
-   - 使用分组标记区分服务端和客户端数据
-   - 只导出必要的数据到客户端，减小包体积
+
+    - 使用分组标记区分服务端和客户端数据
+    - 只导出必要的数据到客户端，减小包体积
 
 4. **建立数据引用关系**：
-   - 使用表引用确保数据一致性
-   - 例如：物品表的 ID 被装备表引用时，确保 ID 存在
+    - 使用表引用确保数据一致性
+    - 例如：物品表的 ID 被装备表引用时，确保 ID 存在
 
 ### 性能优化
 
@@ -750,17 +790,74 @@ typeDefs.Equipment = def.TObject({
 ## 常见问题和解决方案
 
 1. **导出失败，提示类型错误**
-   - 检查 Excel 中的数据类型是否与定义匹配
-   - 检查是否有必填字段为空
+
+    - 检查 Excel 中的数据类型是否与定义匹配
+    - 检查是否有必填字段为空
 
 2. **数组数据格式错误**
-   - 确认使用了正确的分隔符
-   - 检查数组嵌套层级是否正确
+
+    - 确认使用了正确的分隔符
+    - 检查数组嵌套层级是否正确
 
 3. **引用检查失败**
-   - 确保被引用的表格和列已正确加载
-   - 检查引用的 ID 是否存在于目标表中
+
+    - 确保被引用的表格和列已正确加载
+    - 检查引用的 ID 是否存在于目标表中
 
 4. **中文或特殊字符显示问题**
-   - 确保 Excel 文件使用 UTF-8 编码保存
-   - 检查导出格式是否支持中文字符
+    - 确保 Excel 文件使用 UTF-8 编码保存
+    - 检查导出格式是否支持中文字符
+
+## 代码格式化和风格指南
+
+本项目使用标准化的代码格式配置，确保所有文件的一致性。使用了以下工具和配置：
+
+### 格式化工具
+
+-   **Prettier**：根据预定义规则处理代码格式化
+-   **ESLint**：强制执行代码质量和风格规则
+-   **EditorConfig**：确保不同编辑器之间的格式一致性
+-   **Husky & lint-staged**：在提交前自动格式化和检查代码
+
+### 配置文件
+
+-   `.prettierrc`：定义 Prettier 格式化规则（缩进、引号等）
+-   `.prettierignore`：指定 Prettier 要忽略的文件和目录（dist、node_modules 等）
+-   `.eslintrc.js`：配置 ESLint 代码质量规则
+-   `.editorconfig`：设置编辑器级别的格式化规则
+-   `.vscode/settings.json`：配置 VSCode 特定设置
+-   `.lintstagedrc`：定义提交前要格式化和检查的文件
+
+### VSCode 集成
+
+为了获得最佳的 VSCode 开发体验：
+
+1. 安装推荐的扩展：
+
+    - ESLint
+    - Prettier
+    - EditorConfig for VS Code
+
+2. 项目已配置为在保存时自动格式化文件
+
+### 手动格式化
+
+您可以使用以下 npm 脚本手动格式化代码：
+
+```bash
+# 格式化所有文件
+npm run format
+
+# 检查文件是否正确格式化（不更改文件）
+npm run format:check
+
+# 运行 ESLint 检查代码质量问题
+npm run lint
+
+# 自动修复 ESLint 问题
+npm run lint:fix
+```
+
+### CI/CD 集成
+
+CI 流程包含格式检查步骤，确保所有代码都遵循项目的格式化标准。

@@ -1,7 +1,5 @@
 {
-    "IncludeFilesAndPath": [
-        "./testcase"
-    ],
+    "IncludeFilesAndPath": ["./testcase"],
     "GroupMap": {
         "*": "(All) Default value",
         "A": "Server And Client",
@@ -12,17 +10,13 @@
         {
             "type": "json",
             "OutputDir": "./test/exports/global.json",
-            "GroupFilter": [
-                "*"
-            ],
+            "GroupFilter": ["*"],
             "UseDefaultValueIfEmpty": false
         },
         {
             "type": "json",
             "OutputDir": "./test/exports/json/",
-            "GroupFilter": [
-                "C"
-            ],
+            "GroupFilter": ["C"],
             "NameTranslate": {
                 "Id": "_id"
             },
@@ -31,9 +25,7 @@
         {
             "type": "json",
             "OutputDir": "./test/exports/json-bytes.bytes",
-            "GroupFilter": [
-                "*"
-            ],
+            "GroupFilter": ["*"],
             "ExtName": ".bytes",
             "NameTranslate": {
                 "Id": "_id"
@@ -43,29 +35,21 @@
         {
             "type": "js",
             "OutputDir": "./test/exports/js/",
-            "GroupFilter": [
-                "S",
-                "C",
-                "*"
-            ],
+            "GroupFilter": ["S", "C", "*"],
             "ExportTemple": "export const {name}={data}",
             "UseDefaultValueIfEmpty": false
         },
         {
             "type": "js",
             "OutputDir": "./test/exports/global.js",
-            "GroupFilter": [
-                "*"
-            ],
+            "GroupFilter": ["*"],
             "ExportTemple": "export const GConfig = {data}",
             "UseDefaultValueIfEmpty": false
         },
         {
             "type": "lua",
             "OutputDir": "./test/exports/lua/",
-            "GroupFilter": [
-                "*"
-            ],
+            "GroupFilter": ["*"],
             "ExportTemple": "local {name} = {data}\n\nreturn {name}",
             "UseDefaultValueIfEmpty": false,
             "UseShortName": true
@@ -73,9 +57,7 @@
         {
             "type": "lua",
             "OutputDir": "./test/exports/global.lua",
-            "GroupFilter": [
-                "S"
-            ],
+            "GroupFilter": ["S"],
             "ExportTemple": "GConfig = {data}",
             "UseDefaultValueIfEmpty": true
         },
@@ -84,9 +66,7 @@
             "OutputDir": "./test/exports/global_proto3.proto",
             "OutputDataDir": "./test/exports/proto3-data/",
             "ExtName": ".bytes",
-            "GroupFilter": [
-                "*"
-            ],
+            "GroupFilter": ["*"],
             "ExportTemple": "{data}",
             "Namespace": "Hotfix",
             "UseDefaultValueIfEmpty": false,
@@ -101,9 +81,7 @@
             "OutputDir": "./test/exports/global_proto2.proto",
             "OutputDataDir": "./test/exports/proto2-data/{name}Category.bytes",
             "ExtName": ".bytes",
-            "GroupFilter": [
-                "*"
-            ],
+            "GroupFilter": ["*"],
             "ExportTemple": "{data}",
             "Namespace": "Hotfix",
             "UseDefaultValueIfEmpty": false,
@@ -116,14 +94,10 @@
         {
             "type": "protobuf-net",
             "OutputDir": "./test/exports/global.cs",
-            "GroupFilter": [
-                "*"
-            ],
+            "GroupFilter": ["*"],
             "ExportTemple": "[Config()]\npublic partial class {name}Category : ACategory<{name}>{}\n\n{classDef}: IConfig\n{data}\n",
             "Namespace": "Hotfix",
-            "UseNamespace": [
-                "ETModel"
-            ],
+            "UseNamespace": ["ETModel"],
             "UseDefaultValueIfEmpty": false,
             "IDUseGeterAndSeter": true,
             "cm01": "only support for c#",
@@ -136,15 +110,11 @@
         {
             "type": "protobuf-net",
             "OutputDir": "./test/exports/protobuf-net/",
-            "GroupFilter": [
-                "*"
-            ],
+            "GroupFilter": ["*"],
             "ExportTemple": "[Config()]\npublic partial class {name}Category : ACategory<{name}>{}\n\n{classDef}: IConfig\n{data}\n",
             "UseDefaultValueIfEmpty": false,
             "Namespace": "Hotfix",
-            "UseNamespace": [
-                "ETModel"
-            ],
+            "UseNamespace": ["ETModel"],
             "NameTranslate": {
                 "Id": "_id"
             },
@@ -153,10 +123,7 @@
             "IDUseGeterAndSeter": true,
             "cm01": "only support for c#",
             "NullableReferenceTypes": false,
-            "IgnoreTypeExport": [
-                "Vector2",
-                "Vector3"
-            ]
+            "IgnoreTypeExport": ["Vector2", "Vector3"]
         }
     ],
     "see: http://momentjs.com/docs/#/parsing/string-format/": null,
@@ -169,9 +136,5 @@
     "LineBreak": "\n",
     "FractionDigitsFMT": 6,
     "EnableDebugOutput": true,
-    "ArraySpliter": [
-        ",",
-        ";",
-        "\n"
-    ]
+    "ArraySpliter": [",", ";", "\n"]
 }

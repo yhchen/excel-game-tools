@@ -1,0 +1,15 @@
+# Build output
+dist/
+bin/
+
+# Dependencies
+node_modules/
+
+# Coverage reports
+coverage/
+
+# Generated files
+*.js.map
+
+# Other files to ignore
+package-lock.json
