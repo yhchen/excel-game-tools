@@ -14,6 +14,10 @@ class GoExport extends utils.IExportWrapper {
 			utils.debug(`Pass Sheet ${utils.yellow_ul(dt.sheetName)} : No Column To Export.`);
 			return true;
 		}
+		if (dt.arrValues.length <= 0) {
+			utils.debug(`Pass Sheet ${utils.yellow_ul(dt.sheetName)} : No Data To Export.`);
+			return true;
+		}
 		const outfile = path.join(this._exportCfg.OutputDir, `${dt.sheetName}.go`);
 		const name = this.lowercaseFirstLetter(dt.sheetName);
 		const Name = dt.sheetName;
