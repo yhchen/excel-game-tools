@@ -429,6 +429,7 @@ export const ExportWrapperMap = new Map<string, ExportWrapperFactory>([
 	['lua', require('./export/export_to_lua')],
 	['proto3', require('./export/export_to_proto3')],
 	['proto2', require('./export/export_to_proto2')],
+	['go', require('./export/export_to_go')],
 ]);
 
 //#endregion
