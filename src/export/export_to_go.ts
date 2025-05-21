@@ -33,6 +33,7 @@ class GoExport extends utils.IExportWrapper {
 	protected async ExportGlobal(): Promise<boolean> {
 		const outfile = path.join(this._exportCfg.OutputDir, `initialize.go`);
 		let ctx = '';
+		this._globalObj.sort();
 		for (let s of this._globalObj) {
 			ctx += `\t${s} = new${s}()\n`;
 		}
