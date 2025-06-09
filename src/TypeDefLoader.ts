@@ -24,7 +24,11 @@ const def = require('def');
 	} else if (id.startsWith('./') || id.startsWith('../')) {
 		const tryPaths: string[] = [(<any>global).__require_tmp_file_path__, path.dirname(TypeDefParser.TypeCheckerJSFilePath)];
 		for (const p of tryPaths) {
-			if (p != undefined) try { return require(path.resolve(p, id)); } catch { }
+			if (p != undefined) try { const fp = path.resolve(p, id); return require(fp); } catch (ex: Error | any) {
+				if (ex.code !== 'MODULE_NOT_FOUND') {
+					throw ex; // re-throw if it's not a module not found error
+				}
+			}
 		}
 		throw new Error(`could not found js file : ${id} from paths: ${tryPaths.join(',')}`);
 	}
