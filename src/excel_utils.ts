@@ -37,8 +37,9 @@ export async function HandleExcelFile(fileName: string): Promise<boolean> {
 			 *		consumer of files are in the same locale, but that is not always the case over the Internet.
 			 *		To get around this ambiguity, parse functions accept the dateNF option to override the interpretation of that specific format string.
 			 */
-			dateNF: gCfg.TinyDateFmt.toLowerCase(),
+			dateNF: gCfg.DateFmt.toLowerCase(),
 			WTF: true,//If true, throw errors on unexpected file features **
+			UTC: true,//If true, parse dates in UTC mode **
 		};
 		const filebuffer = await fs.promises.readFile(fileName);
 		const excel = xlsx.read(filebuffer, opt);

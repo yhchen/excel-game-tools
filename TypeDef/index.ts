@@ -293,13 +293,31 @@ export namespace def {
     }
 
     /**
+     * convert UTC date to local date
+     * @param utc UTC date
+     * @returns local date
+     */
+    function utc_to_local(utc: Date) {
+        return new Date(utc.getUTCFullYear(), utc.getUTCMonth(), utc.getUTCDate(), utc.getUTCHours(), utc.getUTCMinutes(), utc.getUTCSeconds(), utc.getUTCMilliseconds());
+    }
+
+    /**
+     * convert local date to UTC date
+     * @param local local date
+     * @returns UTC date
+     */
+    function local_to_utc(local: Date) {
+        return new Date(Date.UTC(local.getFullYear(), local.getMonth(), local.getDate(), local.getHours(), local.getMinutes(), local.getSeconds(), local.getMilliseconds()));
+    }
+
+    /**
      * parse data type
      * @param date can be a date string or a Date object
      * @returns return `Date` object if date is validated.
      */
     export function ParseDate(date: any): Date {
         if (moment.isDate(date)) {
-            return date;
+            return utc_to_local(date);
         } else if (typeof date === 'string') {
             const oDate = moment(date, Internal.DateFmt);
             if (!oDate.isValid())

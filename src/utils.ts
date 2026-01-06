@@ -25,6 +25,7 @@ const startTime = moment.now();
 			children: [],
 			path: '',
 			paths: [],
+			isPreloading: false,
 		};
 	}
 }

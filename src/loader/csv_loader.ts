@@ -20,7 +20,7 @@ export class CSVLoader implements IDataLoader {
 				buffer = buffer.slice(3);
 			}
 			csv_parse.parse(buffer, { autoParse: false, autoParseDate: false, cast: false, },
-				(err: csv_parse.CsvError | undefined, records: any | undefined, info: csv_parse.Info) => {
+				(err: csv_parse.CsvError | undefined, records: any | undefined, info: csv_parse.Info | undefined) => {
 					let success = err == undefined && isArray(records) && records.length > 0;
 					if (success) {
 						let csv = new CSVLoader(sheetName, fileName, records, {
