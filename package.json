@@ -8,7 +8,6 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "cd TypeDef && tsc && cd .. && tsc",
     "pkg": "pkg -t node12-linux,node12-macos,node12-win --compress GZip . --out-path=bin/",
-    "update_package": "npm uninstall --save xlsx chalk fs-extra-promise json_to_lua moment lodash && npm uninstall --save-dev @types/chalk @types/fs-extra-promise @types/lodash @types/moment @types/node @types/xlsx typescript && npm install --save xlsx chalk fs-extra-promise json_to_lua moment && npm install --save-dev @types/chalk @types/fs-extra-promise @types/lodash @types/moment @types/node @types/xlsx typescript",
     "prepublishOnly": "npm run build"
   },
   "author": "yhchen",
@@ -18,7 +17,7 @@
     "csv-parse": "^5.0.4",
     "json_to_lua": "^1.1.0",
     "lodash": "^4.17.21",
-    "moment": "^2.24.0",
+    "moment": "^2.30.1",
     "protobufjs": "^6.11.2",
     "xlsx": "^0.18.5"
   },
@@ -26,7 +25,7 @@
     "@types/lodash": "^4.14.179",
     "@types/node": "^12.20.46",
     "pkg": "^5.8.0",
-    "typescript": "^4.8.2"
+    "typescript": "^4.9.5"
   },
   "repository": {
     "type": "git",
