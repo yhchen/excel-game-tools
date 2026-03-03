@@ -29,16 +29,26 @@ npm install
 ```bash
 npm run build
 ```
+4. （可选）打包为 Windows/Linux/macOS 的独立可执行文件：
+```bash
+npm run pkg
+```
+这会在 `bin/` 目录下生成各个平台的可执行文件。
 
 ## 基本使用流程
 
 1. 准备 Excel/CSV 配置文件，按照规定格式填写数据
 2. 创建配置文件 `config.json`，设置导入和导出选项
-3. 编写类型定义文件（如 `typeDef.ts`）
+3. 编写类型定义文件（如 `typeDef.ts` 并编译它，或直接编写 `typeDef.js`）
 4. 运行导出命令：
 ```bash
+# 使用 Node 运行
 node dist/index.js -c config.json -t typeDef.js
+
+# 或使用打包好的二进制文件（以 Windows 为例）
+./bin/excel-game-tools-win.exe -c config.json -t typeDef.js
 ```
+*（注意：当使用 `pkg` 打包的二进制文件运行时，通过 `-t` 参数传入的 `typeDef.js` 是一个外部文件，工具会在运行时动态加载它，不需要一起打包）。*
 
 ## 核心架构流程
 

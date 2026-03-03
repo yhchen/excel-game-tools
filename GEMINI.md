@@ -2,6 +2,9 @@
 
 This document provides system instructions for AI assistants (like Gemini) working on the `excel-game-tools` project.
 
+## ⚠️ Core Language Rule
+**CRITICAL**: You MUST use **Chinese (中文)** for all conversational outputs (`notify_user`, chats) and internal thinking/reasoning steps when interacting with the user in this project. Do not use English unless citing specific variable names or code.
+
 ## 🎯 Project Overview
 `excel-game-tools` is an advanced Node.js + TypeScript CLI utility for exporting game configuration data from Excel (.xlsx, .xls) and CSV files into various programming languages and data formats (JSON, JS, Lua, Go, Proto2, Proto3, C#). It features a robust type-checking and validation system to ensure configuration correctness.
 
@@ -13,6 +16,7 @@ This document provides system instructions for AI assistants (like Gemini) worki
    - **Step 2**: Type Definition parsing (Row 4).
    - **Step 3**: Data Collection and Validation (Row 5+).
 4. **Type System & Validation (`src/TypeDefParser.ts` & `src/TypeUtils.ts`)**: The core engine. Parses the type strings defined in Excel (e.g., `int<!!;!0>`), links them to programmatic definitions in the `typeDef.ts` file provided by the user, and validates data entries against rules (unique, not null, custom logic).
+   - **External Type Resolution (`src/TypeDefLoader.ts`)**: The project is designed to be bundled into a standalone executable using `pkg`. To ensure users can provide dynamic `typeDef.js` rules at runtime without triggering `pkg` static analysis errors, `TypeDefLoader.ts` overrides `global.require`. *Never modify `TypeDefLoader.ts` to use static `import` or strict `require` for user-defined config files, or it will break the packaged binary's ability to load external types.*
 5. **Exporting (`src/export/*`)**: Takes the validated `SheetDataTable` objects and generates the target language code or serialized data files (e.g., `export_to_go.ts`, `export_to_lua.ts`, etc.).
 
 ## 📝 Key Excel Format Rules to Remember

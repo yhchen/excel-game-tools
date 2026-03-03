@@ -29,16 +29,26 @@ npm install
 ```bash
 npm run build
 ```
+4. (Optional) Package as standalone executable binaries for Windows/Linux/macOS:
+```bash
+npm run pkg
+```
+This generates binaries in the `bin/` directory.
 
 ## Basic Usage Process
 
 1. Prepare Excel/CSV configuration files, fill in data according to the specified format
 2. Create a configuration file `config.json`, set import and export options
-3. Write a type definition file (e.g., `typeDef.ts`)
+3. Write a type definition file (e.g., `typeDef.ts` and compile it, or write `typeDef.js` directly)
 4. Run the export command:
 ```bash
+# Using Node directly
 node dist/index.js -c config.json -t typeDef.js
+
+# OR using the compiled binary (e.g., Windows)
+./bin/excel-game-tools-win.exe -c config.json -t typeDef.js
 ```
+*(Note: When using the packaged binary via `pkg`, the `typeDef.js` passed via the `-t` parameter is evaluated dynamically at runtime from the folder the binary is running in).*
 
 ## Core Architecture Pipeline
 
