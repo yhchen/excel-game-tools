@@ -293,6 +293,7 @@ export function HandleDataTableStep3(): boolean {
 			if (header.parser.canCollectionOnBasePass) {
 				continue;
 			}
+
 			// handle parseContent
 			const cIdx = header.cIdx;
 			if (!header.parser) continue;
@@ -302,7 +303,28 @@ export function HandleDataTableStep3(): boolean {
 				if (row.type != utils.ESheetRowType.data) continue;
 
 				// if (!data) continue;
-				const data = row.worksheet.getData(cIdx, row.rIdx);
+				let data = row.worksheet.getData(cIdx, row.rIdx);
+
+				if (header.colspan && header.colspan > 1) {
+					let validValues: string[] = [];
+					let hasValue = false;
+					for (let i = 0; i < header.colspan; i++) {
+						const tempCell = row.worksheet.getData(cIdx + i, row.rIdx);
+						if (tempCell && utils.StrNotEmpty(tempCell.w)) {
+							validValues.push(tempCell.w);
+							hasValue = true;
+						}
+					}
+					if (!hasValue) {
+						data = undefined;
+					} else {
+						const level = header.parser?.type?.__inner__level__abcxyz__ ?? 1;
+						const sp = gCfg.ArraySpliter[level - 1] ?? ';';
+						const mergedStr = validValues.join(sp);
+						data = { w: mergedStr, v: mergedStr, t: 's' } as xlsx.CellObject;
+					}
+				}
+
 				try {
 					TypeDefParser.setColumnName(header.name);
 					TypeDefParser.setRowData(row.values);
