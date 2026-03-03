@@ -11,7 +11,7 @@
     "Export": [
         {
             "type": "json",
-            "OutputDir": "./test/exports/global.json",
+            "OutputDir": "./testcase/exports/global.json",
             "GroupFilter": [
                 "*"
             ],
@@ -19,7 +19,7 @@
         },
         {
             "type": "json",
-            "OutputDir": "./test/exports/json/",
+            "OutputDir": "./testcase/exports/json/",
             "GroupFilter": [
                 "C"
             ],
@@ -30,7 +30,7 @@
         },
         {
             "type": "json",
-            "OutputDir": "./test/exports/json-bytes.bytes",
+            "OutputDir": "./testcase/exports/json-bytes.bytes",
             "GroupFilter": [
                 "*"
             ],
@@ -42,7 +42,7 @@
         },
         {
             "type": "js",
-            "OutputDir": "./test/exports/js/",
+            "OutputDir": "./testcase/exports/js/",
             "GroupFilter": [
                 "S",
                 "C",
@@ -53,7 +53,7 @@
         },
         {
             "type": "js",
-            "OutputDir": "./test/exports/global.js",
+            "OutputDir": "./testcase/exports/global.js",
             "GroupFilter": [
                 "*"
             ],
@@ -62,7 +62,7 @@
         },
         {
             "type": "lua",
-            "OutputDir": "./test/exports/lua/",
+            "OutputDir": "./testcase/exports/lua/",
             "GroupFilter": [
                 "*"
             ],
@@ -72,7 +72,7 @@
         },
         {
             "type": "lua",
-            "OutputDir": "./test/exports/global.lua",
+            "OutputDir": "./testcase/exports/global.lua",
             "GroupFilter": [
                 "S"
             ],
@@ -81,8 +81,8 @@
         },
         {
             "type": "proto3",
-            "OutputDir": "./test/exports/global_proto3.proto",
-            "OutputDataDir": "./test/exports/proto3-data/",
+            "OutputDir": "./testcase/exports/global_proto3.proto",
+            "OutputDataDir": "./testcase/exports/proto3-data/",
             "ExtName": ".bytes",
             "GroupFilter": [
                 "*"
@@ -98,8 +98,8 @@
         },
         {
             "type": "proto2",
-            "OutputDir": "./test/exports/global_proto2.proto",
-            "OutputDataDir": "./test/exports/proto2-data/{name}Category.bytes",
+            "OutputDir": "./testcase/exports/global_proto2.proto",
+            "OutputDataDir": "./testcase/exports/proto2-data/{name}Category.bytes",
             "ExtName": ".bytes",
             "GroupFilter": [
                 "*"
@@ -115,7 +115,7 @@
         },
         {
             "type": "protobuf-net",
-            "OutputDir": "./test/exports/global.cs",
+            "OutputDir": "./testcase/exports/global.cs",
             "GroupFilter": [
                 "*"
             ],
@@ -135,7 +135,7 @@
         },
         {
             "type": "protobuf-net",
-            "OutputDir": "./test/exports/protobuf-net/",
+            "OutputDir": "./testcase/exports/protobuf-net/",
             "GroupFilter": [
                 "*"
             ],
