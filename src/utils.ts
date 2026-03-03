@@ -380,7 +380,7 @@ export abstract class IExportWrapper {
 	protected abstract ExportGlobal(): Promise<boolean>;
 	protected CreateDir(outdir: string): boolean {
 		if (!fs.existsSync(outdir)) {
-			fs.mkdirSync(outdir);
+			fs.mkdirSync(outdir, { recursive: true });
 			return fs.existsSync(outdir);
 		}
 		return true;
