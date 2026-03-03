@@ -19,6 +19,17 @@ export class ExcelLoader implements IDataLoader {
 		return xlsx.utils.decode_range(<string>this.worksheet['!ref']);
 	}
 
+	getMerges(c: number, r: number): xlsx.Range | undefined {
+		if (this.worksheet['!merges']) {
+			for (const range of this.worksheet['!merges']) {
+				if (range.s.c === c && range.s.r === r) {
+					return range;
+				}
+			}
+		}
+		return undefined;
+	}
+
 	public get sheetName(): string { return this._sheetName; }
 	public get fileName(): string { return this._fileName; }
 }

@@ -178,6 +178,15 @@ function HandleWorksheetNameRow(worksheet: IDataLoader, rIdx: number, RowMax: nu
 			if (cell?.w == null || IsCommentCell(cell)) {
 				continue;
 			}
+
+			let colspan = 1;
+			if (worksheet.getMerges) {
+				const range = worksheet.getMerges(cIdx, rIdx);
+				if (range) {
+					colspan = range.e.c - range.s.c + 1;
+				}
+			}
+
 			const comment = worksheet.getData(cIdx, commentRIdx)?.w ?? undefined;
 			var name = cell.w;
 			if (!/^[a-zA-Z0-9_]+$/.test(name)) {
@@ -190,6 +199,7 @@ function HandleWorksheetNameRow(worksheet: IDataLoader, rIdx: number, RowMax: nu
 				name: name,
 				shortName: utils.FMT26.NumToS26(arrTypeHeader.length),
 				cIdx: cIdx,
+				colspan: colspan,
 				idx: arrTypeHeader.length,
 				stype: '', // there is no stype
 				isComment: false,
@@ -201,6 +211,11 @@ function HandleWorksheetNameRow(worksheet: IDataLoader, rIdx: number, RowMax: nu
 			mapTypeHeader.set(header.cIdx, header);
 			headerNameMap.set(name, cIdx);
 			tmpArry.push(name);
+
+			// skip merged columns
+			if (colspan > 1) {
+				cIdx += colspan - 1;
+			}
 		}
 		DataTable.arrTypeHeader = arrTypeHeader;
 		DataTable.mapTypeHeader = mapTypeHeader;
@@ -312,6 +327,7 @@ function HandleWorksheetTypeRow(worksheet: IDataLoader, rIdx: number,
 	const arrHeaderName = DataTable.arrTypeHeader;
 	for (; rIdx <= RowMax; ++rIdx) {
 		const zeroCell = worksheet.getData(0, rIdx);
+		if (arrHeaderName.length === 0) continue;
 		const firstCell = worksheet.getData(arrHeaderName[0].cIdx, rIdx);
 		if (firstCell == undefined || !utils.StrNotEmpty(firstCell.w) || zeroCell == undefined || !utils.StrNotEmpty(zeroCell.w)) {
 			continue;
@@ -389,7 +405,28 @@ function HandleWorksheetCollectBaseDataRow(worksheet: IDataLoader, rIdx: number,
 				tmpArry[header.cIdx] = undefined;
 			} else {
 				TypeDefParser.setColumnName(header.name);
-				const cell = worksheet.getData(header.cIdx, rIdx);
+				let cell = worksheet.getData(header.cIdx, rIdx);
+
+				if (header.colspan && header.colspan > 1) {
+					let validValues: string[] = [];
+					let hasValue = false;
+					for (let i = 0; i < header.colspan; i++) {
+						const tempCell = worksheet.getData(header.cIdx + i, rIdx);
+						if (tempCell && utils.StrNotEmpty(tempCell.w)) {
+							validValues.push(tempCell.w);
+							hasValue = true;
+						}
+					}
+					if (!hasValue) {
+						cell = undefined;
+					} else {
+						const level = header.parser?.type?.__inner__level__abcxyz__ ?? 1;
+						const sp = gCfg.ArraySpliter[level - 1] ?? ';';
+						const mergedStr = validValues.join(sp);
+						cell = { w: mergedStr, v: mergedStr, t: 's' } as xlsx.CellObject;
+					}
+				}
+
 				const value = cell && cell.w ? cell.w : '';
 				let colObj;
 				try {

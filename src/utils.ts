@@ -201,6 +201,7 @@ export type SheetHeader = {
 	shortName: string, //shortName
 	stype: string, // type string
 	cIdx: number, // header idx
+	colspan?: number;
 	idx: number,
 	isComment: boolean; // is comment line?
 	comment?: string; // 注释内容
