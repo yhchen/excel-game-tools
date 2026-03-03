@@ -5,7 +5,7 @@
 这是一个高效的 Excel/CSV 配置导出工具，专为游戏开发者设计，用于将 Excel 表格数据导出为多种格式（JSON、JS、Lua、Protobuf 等），并提供强大的类型检查功能，确保游戏配置数据的正确性和一致性。
 
 主要特点：
-- 支持导出为多种格式：JSON、JS、Lua、Protocol Buffers 等
+- 支持导出为多种格式：JSON、JS、Lua、Go、Proto2、Proto3、C# 等
 - 强大的类型检查系统，支持基本类型、数组、对象、枚举等
 - 支持自定义类型定义和验证规则
 - 支持 Excel 和 CSV 文件格式
@@ -39,6 +39,13 @@ npm run build
 ```bash
 node dist/index.js -c config.json -t typeDef.js
 ```
+
+## 核心架构流程
+
+1. **读取系统 (Loader)**：通过 `loader/excel_loader.ts` 和 `loader/csv_loader.ts` 读取 Excel/CSV 文件的原始数据。
+2. **行处理 (Row processing)**：通过 `excel_utils.ts` 处理结构行（表名、类型、分组标记）并收集和验证数据行。
+3. **类型检查器 (Type Checking)**：核心引擎 `TypeDefParser.ts`，负责将 Excel 中的类型定义字符串（如 `int<!!;!0>`）映射到代码层面，执行基本数据验证和用户自定义的验证逻辑。
+4. **导出系统 (Exporters)**：将验证后的数据结构通过 `export/export_to_*.ts` 导出为对应语言代码和数据文件。
 
 ## Excel/CSV 文件格式规范
 
@@ -569,7 +576,19 @@ local Item = {
 return Item
 ```
 
-### Protocol Buffers 格式
+### Proto2 格式
+
+```json
+{
+    "type": "proto2",
+    "OutputDir": "./exports/proto2.proto",      // 输出协议文件
+    "OutputDataDir": "./exports/proto2-data/",  // 输出数据文件
+    "Namespace": "GameConfig",                  // 命名空间
+    "ARRAY_ELEMENT_NAME": "list"                // 数组元素名称
+}
+```
+
+### Proto3 格式
 
 ```json
 {
@@ -595,6 +614,16 @@ message Item {
 
 message ItemCategory {
     repeated Item list = 1;
+}
+```
+
+### Go 格式
+
+```json
+{
+    "type": "go",
+    "OutputDir": "./exports/go/",
+    "PackageName": "GameConfig"                 // Go package 名称
 }
 ```
 

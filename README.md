@@ -5,7 +5,7 @@
 This is an efficient Excel/CSV configuration export tool designed specifically for game developers, used to export Excel spreadsheet data to various formats (JSON, JS, Lua, Protobuf, etc.), and provides powerful type checking functionality to ensure the correctness and consistency of game configuration data.
 
 Main features:
-- Support for exporting to multiple formats: JSON, JS, Lua, Protocol Buffers, etc.
+- Support for exporting to multiple formats: JSON, JS, Lua, Go, Proto2, Proto3, C#, etc.
 - Powerful type checking system, supporting basic types, arrays, objects, enums, etc.
 - Support for custom type definitions and validation rules
 - Support for Excel and CSV file formats
@@ -39,6 +39,13 @@ npm run build
 ```bash
 node dist/index.js -c config.json -t typeDef.js
 ```
+
+## Core Architecture Pipeline
+
+1. **Loader System**: Reads raw data from Excel/CSV files through `loader/excel_loader.ts` and `loader/csv_loader.ts`.
+2. **Row Processing**: Processes structural rows (Names, Types, Group Filters) and collects data via `excel_utils.ts`.
+3. **Type Checking & Validation**: Core engine `TypeDefParser.ts` maps string types from Excel (like `int<!!;!0>`) to code rules, executing basic validations and custom user-defined logic.
+4. **Exporters**: Exports validated data structures to specific languages and formats via `export/export_to_*.ts`.
 
 ## Excel/CSV File Format Specifications
 
@@ -569,7 +576,19 @@ local Item = {
 return Item
 ```
 
-### Protocol Buffers Format
+### Proto2 Format
+
+```json
+{
+    "type": "proto2",
+    "OutputDir": "./exports/proto2.proto",      // Output protocol file
+    "OutputDataDir": "./exports/proto2-data/",  // Output data file
+    "Namespace": "GameConfig",                  // Namespace
+    "ARRAY_ELEMENT_NAME": "list"                // Array element name
+}
+```
+
+### Proto3 Format
 
 ```json
 {
@@ -595,6 +614,16 @@ message Item {
 
 message ItemCategory {
     repeated Item list = 1;
+}
+```
+
+### Go Format
+
+```json
+{
+    "type": "go",
+    "OutputDir": "./exports/go/",
+    "PackageName": "GameConfig"                 // Go package name
 }
 ```
 
