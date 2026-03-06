@@ -49,7 +49,7 @@ var def;
                     var res = [];
                     for (var _i = 0, data_1 = data; _i < data_1.length; _i++) {
                         var d = data_1[_i];
-                        res.push(type.__inner__parse__abcxyz__(d));
+                        res.push(type(d));
                     }
                     if (exChecker != undefined) {
                         exChecker(res);
@@ -103,7 +103,7 @@ var def;
                     res[k] = type[k].__inner__defaultval__abcxyz__;
                 }
                 else {
-                    res[k] = type[k].__inner__parse__abcxyz__(data[index]);
+                    res[k] = type[k](data[index]);
                 }
                 ++index;
             }
@@ -151,7 +151,7 @@ var def;
                     res[k] = type[k].__inner__defaultval__abcxyz__;
                 }
                 else {
-                    res[k] = type[k].__inner__parse__abcxyz__(data[k]);
+                    res[k] = type[k](data[k]);
                 }
             }
             if (exChecker != undefined) {
@@ -173,7 +173,7 @@ var def;
             return type;
         }
         return Type(type.__inner__type__abcxyz__, type.__inner__name__abcxyz__, type.__inner__o_type__abcxyz__, type.__inner__level__abcxyz__, type.__inner__count__abcxyz__, type.__inner__defaultval__abcxyz__, function (data) {
-            var res = type.__inner__parse__abcxyz__(data);
+            var res = type(data);
             exChecker(res);
             return res;
         }, true, type.__inner__is_json_parse_mode__);
@@ -188,6 +188,13 @@ var def;
      */
     function TEnum(enumDefine, name) {
         var enumObject = {};
+        var FunctionReadOnlyKeyMap = {
+            length: true,
+            name: true,
+            arguments: true,
+            caller: true,
+            prototype: true,
+        };
         var hasZero = false;
         for (var key in enumDefine) {
             var val = enumDefine[key];
@@ -208,8 +215,12 @@ var def;
         }, false, false);
         // for outer checker
         for (var k in enumDefine) {
+            if (FunctionReadOnlyKeyMap[k]) {
+                continue;
+            }
             enumType[k] = enumDefine[k];
         }
+        enumType.__inner__enum_object__ = enumObject;
         return enumType;
     }
     def.TEnum = TEnum;
@@ -266,7 +277,6 @@ var def;
             __inner__defaultval__abcxyz__: defaultValue,
             __inner__is_json_parse_mode__: is_json_parse_mode,
             __inner_has_ex_checkers: has_ex_checkers,
-            __inner__parse__abcxyz__: parse,
             DVAL: function (customDefaultVal) {
                 if (otype != 'enum' && otype != 'base') {
                     throw new Error('Only <enum> and <base> type can use DVAL function!');

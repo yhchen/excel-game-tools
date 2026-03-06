@@ -160,9 +160,9 @@ export class TypeDefParser {
 		switch (this._typeDef.__inner__o_type__abcxyz__) {
 			case 'base':
 			case 'enum':
-				return this._typeDef.__inner__parse__abcxyz__(value.v ?? value.w);
+				return this._typeDef(value.v ?? value.w);
 			case 'column':
-				return this._typeDef.__inner__parse__abcxyz__(value.v ?? value.w);
+				return this._typeDef(value.v ?? value.w);
 			case 'object':
 			case 'array': {
 				if (this._typeDef.__inner__is_json_parse_mode__) {
@@ -172,7 +172,7 @@ export class TypeDefParser {
 					} catch (ex) {
 						utils.exception(`invalid json: \n${json}`, ex);
 					}
-					return this._typeDef.__inner__parse__abcxyz__(json);
+					return this._typeDef(json);
 				} else {
 					// 如果在TArray或者TObject的配置中，有且仅有一个Date元素的时候，获取到的字符串是不正确的，所以需要用moment格式化一次
 					let v = value.w;
@@ -180,7 +180,7 @@ export class TypeDefParser {
 						v = moment(value.v).format(gCfg.DateFmt);
 					}
 					const arr = this.splitArray(v, this._typeDef.__inner__level__abcxyz__ - 1);
-					return this._typeDef.__inner__parse__abcxyz__(arr);
+					return this._typeDef(arr);
 				}
 			}
 			default:
@@ -362,21 +362,21 @@ export class TypeDefParser {
 
 export function unitTest() {
 	// fixme: for test
-	utils.logger(typeDefs.Position.__inner__parse__abcxyz__([1, 2, 3, 4]));
-	utils.logger(typeDefs.Award.__inner__parse__abcxyz__(["Item", 2, 3]));
-	utils.logger(typeDefs.Test1.__inner__parse__abcxyz__(["Item", 2, "Equip", "2"]));
-	utils.logger(typeDefs.Item3.__inner__parse__abcxyz__([10001, 10002, 10003]));
-	// utils.logger(type_defines.Item3.__inner__parse__abcxyz__([1, 2, 3]));
-	utils.logger(typeDefs.EquipId.__inner__parse__abcxyz__(1003));
-	utils.logger("Boolean: " + "True" + " Result: " + typeDefs.boolean.__inner__parse__abcxyz__("True"));
-	utils.logger("Boolean: " + "true" + " Result: " + typeDefs.boolean.__inner__parse__abcxyz__("true"));
-	utils.logger("Boolean: " + "false" + " Result: " + typeDefs.boolean.__inner__parse__abcxyz__("false"));
-	utils.logger("Boolean: " + "False" + " Result: " + typeDefs.boolean.__inner__parse__abcxyz__("False"));
-	utils.logger("Boolean: " + "0" + " Result: " + typeDefs.boolean.__inner__parse__abcxyz__("0"));
-	utils.logger("Boolean: " + "1" + " Result: " + typeDefs.boolean.__inner__parse__abcxyz__("1"));
-	utils.logger("Boolean: " + 2 + " Result: " + typeDefs.boolean.__inner__parse__abcxyz__(2));
-	utils.logger("Boolean: " + 1 + " Result: " + typeDefs.boolean.__inner__parse__abcxyz__(1));
-	utils.logger("Boolean: " + 0 + " Result: " + typeDefs.boolean.__inner__parse__abcxyz__(0));
+	utils.logger(typeDefs.Position([1, 2, 3, 4]));
+	utils.logger(typeDefs.Award(["Item", 2, 3]));
+	utils.logger(typeDefs.Test1(["Item", 2, "Equip", "2"]));
+	utils.logger(typeDefs.Item3([10001, 10002, 10003]));
+	// utils.logger(type_defines.Item3([1, 2, 3]));
+	utils.logger(typeDefs.EquipId(1003));
+	utils.logger("Boolean: " + "True" + " Result: " + typeDefs.boolean("True"));
+	utils.logger("Boolean: " + "true" + " Result: " + typeDefs.boolean("true"));
+	utils.logger("Boolean: " + "false" + " Result: " + typeDefs.boolean("false"));
+	utils.logger("Boolean: " + "False" + " Result: " + typeDefs.boolean("False"));
+	utils.logger("Boolean: " + "0" + " Result: " + typeDefs.boolean("0"));
+	utils.logger("Boolean: " + "1" + " Result: " + typeDefs.boolean("1"));
+	utils.logger("Boolean: " + 2 + " Result: " + typeDefs.boolean(2));
+	utils.logger("Boolean: " + 1 + " Result: " + typeDefs.boolean(1));
+	utils.logger("Boolean: " + 0 + " Result: " + typeDefs.boolean(0));
 	// fixme: for test
 	process.exit(0);
 }

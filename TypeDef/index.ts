@@ -50,7 +50,7 @@ export namespace def {
                     }
                     let res = [];
                     for (const d of data) {
-                        res.push(type.__inner__parse__abcxyz__(d));
+                        res.push(type(d));
                     }
                     if (exChecker != undefined) {
                         exChecker(res);
@@ -100,7 +100,7 @@ export namespace def {
                 if (data.length <= index) {
                     res[k] = type[k].__inner__defaultval__abcxyz__;
                 } else {
-                    res[k] = type[k].__inner__parse__abcxyz__(data[index]);
+                    res[k] = type[k](data[index]);
                 }
                 ++index;
             }
@@ -111,7 +111,7 @@ export namespace def {
         }, exChecker != undefined, false);
         // 如果TObject的每一个对象都有默认值，则可以直接导出对应的对象
         if (minCount <= 0) {
-            res.__inner__defaultval__abcxyz__ = res.__inner__parse__abcxyz__([]);
+            res.__inner__defaultval__abcxyz__ = res([]);
             res.__inner_has_default_value = true;
         }
         res.__inner__is_struct_parse_mode__ = false;
@@ -166,7 +166,7 @@ export namespace def {
                 if (data[k] == undefined) {
                     res[k] = type[k].__inner__defaultval__abcxyz__;
                 } else {
-                    res[k] = type[k].__inner__parse__abcxyz__(data[k]);
+                    res[k] = type[k](data[k]);
                 }
             }
             if (exChecker != undefined) {
@@ -188,7 +188,7 @@ export namespace def {
             return type;
         }
         return Type(type.__inner__type__abcxyz__, type.__inner__name__abcxyz__, type.__inner__o_type__abcxyz__, type.__inner__level__abcxyz__, type.__inner__count__abcxyz__, type.__inner__defaultval__abcxyz__, (data) => {
-            const res = type.__inner__parse__abcxyz__(data);
+            const res = type(data);
             exChecker(res);
             return res;
         }, true, type.__inner__is_json_parse_mode__);
@@ -205,10 +205,18 @@ export namespace def {
             return type;
         }
         return Type(type.__inner__type__abcxyz__, type.__inner__name__abcxyz__, type.__inner__o_type__abcxyz__, type.__inner__level__abcxyz__, type.__inner__count__abcxyz__, type.__inner__defaultval__abcxyz__, (data) => {
-            const res = type.__inner__parse__abcxyz__(data);
+            const res = type(data);
             return translator(res);
         }, true, type.__inner__is_json_parse_mode__);
     }
+
+    const FunctionReadOnlyKeyMap: { [key: string]: true; } = {
+        length: true,
+        name: true,
+        arguments: true,
+        caller: true,
+        prototype: true,
+    };
 
     /**
      * generate enum type
@@ -239,8 +247,12 @@ export namespace def {
         }, false, false);
         // for outer checker
         for (const k in enumDefine) {
+            if (FunctionReadOnlyKeyMap[k]) {
+                continue;
+            }
             enumType[k] = enumDefine[k];
         }
+        enumType.__inner__enum_object__ = enumObject;
         enumType.__inner__is_flag__mode = isFlag;
         return enumType;
     }
@@ -342,71 +354,75 @@ export namespace def {
     /**
      * Common Defines
      */
-    export type CommonTypeDef = {
-        /**
-         * Set default value for base data.(string, int, short, etc...)
-         * @param customDefaultVal Default value.
-         * @returns Return a new TypeDef object that uses @param customDefaultVal as the default value
+    export type CommonTypeDef =
+        /** 
+         * data parser, will be called in type parse process, can be used for data translate or check. if found error can throw new Error('what is wrong?') or throw `error message`
          */
-        DVAL: (customDefaultVal: any) => TypeDef,
+        ((data: any) => any) &
         /**
-         * ATTENTION: Tools built-in variables, please do not modify or the same name
+         * set default value for current type, only can be used for base type and enum type, if current type is not base type or enum type, call DVAL function will throw error. if found error can throw new Error('what is wrong?') or throw `error message`
          */
-        /**
-         * name
-         */
-        __inner__name__abcxyz__?: string,
-        // /**
-        //  * sub type
-        //  */
-        // __inner__type__abcxyz__: SubType,
-        // /**
-        //  * @see OType
-        //  */
-        // __inner__o_type__abcxyz__: OType,
-        /**
-         * current array (or object) deep
-         */
-        __inner__level__abcxyz__: number,
-        /**
-         * number of arrays, if undefined the length is not limited
-         */
-        __inner__count__abcxyz__?: number,
-        /**
-         * default value
-         */
-        __inner__defaultval__abcxyz__: any,
-        /**
-         * is json parse mode object
-         */
-        __inner__is_json_parse_mode__: boolean, // 是否是json解析模式
-        /**
-         * has ex checker(will be parse in second pass)
-         */
-        __inner_has_ex_checkers: boolean,
-        /**
-         * data parser
-         */
-        __inner__parse__abcxyz__: (data: any) => any;
-        /**
-         * collect user comment data
-         */
-        __inner__def_comment?: {
+        {
             /**
-             * sub node comment collection
+             * Set default value for base data.(string, int, short, etc...)
+             * @param customDefaultVal Default value.
+             * @returns Return a new TypeDef object that uses @param customDefaultVal as the default value
              */
-            children?: { [key: string]: string[]; },
+            DVAL: (customDefaultVal: any) => TypeDef,
             /**
-             * current node comment collection
+             * ATTENTION: Tools built-in variables, please do not modify or the same name
              */
-            self: string[],
             /**
-             * End node comment collection (currently used to record Endregion, but you can consider extending other functions later)
+             * name
              */
-            tail?: string[],
+            __inner__name__abcxyz__?: string,
+            // /**
+            //  * sub type
+            //  */
+            // __inner__type__abcxyz__: SubType,
+            // /**
+            //  * @see OType
+            //  */
+            // __inner__o_type__abcxyz__: OType,
+            /**
+             * current array (or object) deep
+             */
+            __inner__level__abcxyz__: number,
+            /**
+             * number of arrays, if undefined the length is not limited
+             */
+            __inner__count__abcxyz__?: number,
+            /**
+             * default value
+             */
+            __inner__defaultval__abcxyz__: any,
+            /**
+             * is json parse mode object
+             */
+            __inner__is_json_parse_mode__: boolean, // 是否是json解析模式
+            /**
+             * has ex checker(will be parse in second pass)
+             */
+            __inner_has_ex_checkers: boolean,
+            /**
+             * collect user comment data
+             */
+            __inner__def_comment?: {
+                /**
+                 * sub node comment collection
+                 */
+                children?: { [key: string]: string[]; },
+                /**
+                 * current node comment collection
+                 */
+                self: string[],
+                /**
+                 * End node comment collection (currently used to record Endregion, but you can consider extending other functions later)
+                 */
+                tail?: string[],
+            };
+            __inner_has_default_value?: boolean;
         };
-        __inner_has_default_value?: boolean;
-    };
 
     /**
      * Base Type Defines
@@ -509,33 +525,35 @@ export namespace def {
             throw new Error(`Type must have a parser. for data translate`);
         }
         const comment = GetTypeComment();
-        return <TypeDefMap[_OTYPE]>{
-            __inner__type__abcxyz__: type,
-            __inner__name__abcxyz__: name,
-            __inner__o_type__abcxyz__: otype,
-            __inner__level__abcxyz__: level,
-            __inner__count__abcxyz__: count,
-            __inner__defaultval__abcxyz__: defaultValue,
-            __inner__is_json_parse_mode__: is_json_parse_mode,
-            __inner_has_ex_checkers: has_ex_checkers,
-            __inner__parse__abcxyz__: parse,
-            DVAL: (customDefaultVal) => {
-                if (otype != 'enum' && otype != 'base') {
-                    throw new Error('Only <enum> and <base> type can use DVAL function!');
-                }
-                if (customDefaultVal == undefined) {
-                    throw new Error(`default value can not be null or undefined.`);
-                }
-                if (typeof (customDefaultVal) != typeof (defaultValue)) {
-                    throw new Error(`default value type incorrect! need type: ${typeof (defaultValue)} current type: ${typeof (customDefaultVal)}`);
-                }
-                let newType = Type(type, name, otype, level, count, customDefaultVal, parse, has_ex_checkers, is_json_parse_mode);
-                newType.__inner__def_comment = comment;
-                newType.__inner_has_default_value = true;
-                return newType;
-            },
-            __inner__def_comment: comment,
-        };
+        const ret = <TypeDefMap[_OTYPE]><any>Object.assign(
+            (data: any) => parse(data),
+            {
+                __inner__type__abcxyz__: type,
+                __inner__name__abcxyz__: name,
+                __inner__o_type__abcxyz__: otype,
+                __inner__level__abcxyz__: level,
+                __inner__count__abcxyz__: count,
+                __inner__defaultval__abcxyz__: defaultValue,
+                __inner__is_json_parse_mode__: is_json_parse_mode,
+                __inner_has_ex_checkers: has_ex_checkers,
+                DVAL: (customDefaultVal: any) => {
+                    if (otype != 'enum' && otype != 'base') {
+                        throw new Error('Only <enum> and <base> type can use DVAL function!');
+                    }
+                    if (customDefaultVal == undefined) {
+                        throw new Error(`default value can not be null or undefined.`);
+                    }
+                    if (typeof (customDefaultVal) != typeof (defaultValue)) {
+                        throw new Error(`default value type incorrect! need type: ${typeof (defaultValue)} current type: ${typeof (customDefaultVal)}`);
+                    }
+                    let newType = Type(type, name, otype, level, count, customDefaultVal, parse, has_ex_checkers, is_json_parse_mode);
+                    newType.__inner__def_comment = comment;
+                    newType.__inner_has_default_value = true;
+                    return newType;
+                },
+                __inner__def_comment: comment,
+            });
+        return ret;
     }
 
     /**
