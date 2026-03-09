@@ -282,6 +282,60 @@ export async function HandleDataTableStep2(): Promise<boolean> {
 	return true;
 }
 
+function MergeArrayCells(worksheet: IDataLoader, cIdx: number, rIdx: number, header: utils.SheetHeader): xlsx.CellObject | undefined {
+	let validChunks: string[] = [];
+	let hasValue = false;
+	const typeDef = header.parser?.type;
+	const level = typeDef?.__inner__level__abcxyz__ ?? 1;
+	const sp = gCfg.ArraySpliter[level - 1] ?? ';';
+	const colspan = header.colspan ?? 1;
+
+	// Determine chunk size based on the element type of the array
+	let chunkSize = 1;
+	let innerSp = '';
+
+	if (typeDef && typeDef.__inner__o_type__abcxyz__ === 'array') {
+		const elementType = typeDef.__inner__type__abcxyz__;
+		if (elementType && elementType.__inner__count__abcxyz__) {
+			chunkSize = elementType.__inner__count__abcxyz__;
+		}
+		const innerLevel = elementType?.__inner__level__abcxyz__ ?? 1;
+		if (innerLevel > 0) {
+			innerSp = gCfg.ArraySpliter[innerLevel - 1] ?? ',';
+		}
+	}
+
+	for (let i = 0; i < colspan; i += chunkSize) {
+		let chunkCells: string[] = [];
+		let chunkHasValue = false;
+		// Collect cells for this chunk
+		for (let j = 0; j < chunkSize; j++) {
+			if (i + j < colspan) {
+				const tempCell = worksheet.getData(cIdx + i + j, rIdx);
+				const cellStr = (tempCell && utils.StrNotEmpty(tempCell.w)) ? tempCell.w : '';
+				chunkCells.push(cellStr);
+				if (cellStr !== '') {
+					chunkHasValue = true;
+					hasValue = true;
+				}
+			}
+		}
+
+		if (chunkHasValue) {
+			// Join chunk cells with inner splitter (for TObject etc.)
+			const chunkStr = innerSp ? chunkCells.join(innerSp) : chunkCells.join('');
+			validChunks.push(chunkStr);
+		}
+	}
+
+	if (!hasValue || validChunks.length === 0) {
+		return undefined;
+	} else {
+		const mergedStr = validChunks.join(sp);
+		return { w: mergedStr, v: mergedStr, t: 's' } as xlsx.CellObject;
+	}
+}
+
 // step 3. init data row
 export function HandleDataTableStep3(): boolean {
 	let foundError = false;
@@ -306,23 +360,7 @@ export function HandleDataTableStep3(): boolean {
 				let data = row.worksheet.getData(cIdx, row.rIdx);
 
 				if (header.colspan && header.colspan > 1) {
-					let validValues: string[] = [];
-					let hasValue = false;
-					for (let i = 0; i < header.colspan; i++) {
-						const tempCell = row.worksheet.getData(cIdx + i, row.rIdx);
-						if (tempCell && utils.StrNotEmpty(tempCell.w)) {
-							validValues.push(tempCell.w);
-							hasValue = true;
-						}
-					}
-					if (!hasValue) {
-						data = undefined;
-					} else {
-						const level = header.parser?.type?.__inner__level__abcxyz__ ?? 1;
-						const sp = gCfg.ArraySpliter[level - 1] ?? ';';
-						const mergedStr = validValues.join(sp);
-						data = { w: mergedStr, v: mergedStr, t: 's' } as xlsx.CellObject;
-					}
+					data = MergeArrayCells(row.worksheet, cIdx, row.rIdx, header) ?? undefined;
 				}
 
 				try {
@@ -430,23 +468,7 @@ function HandleWorksheetCollectBaseDataRow(worksheet: IDataLoader, rIdx: number,
 				let cell = worksheet.getData(header.cIdx, rIdx);
 
 				if (header.colspan && header.colspan > 1) {
-					let validValues: string[] = [];
-					let hasValue = false;
-					for (let i = 0; i < header.colspan; i++) {
-						const tempCell = worksheet.getData(header.cIdx + i, rIdx);
-						if (tempCell && utils.StrNotEmpty(tempCell.w)) {
-							validValues.push(tempCell.w);
-							hasValue = true;
-						}
-					}
-					if (!hasValue) {
-						cell = undefined;
-					} else {
-						const level = header.parser?.type?.__inner__level__abcxyz__ ?? 1;
-						const sp = gCfg.ArraySpliter[level - 1] ?? ';';
-						const mergedStr = validValues.join(sp);
-						cell = { w: mergedStr, v: mergedStr, t: 's' } as xlsx.CellObject;
-					}
+					cell = MergeArrayCells(worksheet, header.cIdx, rIdx, header) ?? undefined;
 				}
 
 				const value = cell && cell.w ? cell.w : '';
