@@ -35,6 +35,16 @@ npm run pkg
 ```
 这会在 `bin/` 目录下生成各个平台的可执行文件。
 
+### 验证
+
+修改 loader、parser、TypeDef 行为、exporter 或生成输出规则前后，运行 fixture 验证命令：
+
+```bash
+npm test
+```
+
+该命令会构建 TypeDef 包和主项目，运行内置 fixtures，并检查代表性生成输出。
+
 ## 基本使用流程
 
 1. 准备 Excel/CSV 配置文件，按照规定格式填写数据

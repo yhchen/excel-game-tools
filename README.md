@@ -35,6 +35,16 @@ npm run pkg
 ```
 This generates binaries in the `bin/` directory.
 
+### Validation
+
+Run the fixture validation command before changing loaders, parsers, TypeDef behavior, exporters, or generated-output rules:
+
+```bash
+npm test
+```
+
+This builds the TypeDef package, builds the main project, runs the bundled fixtures, and checks representative generated outputs.
+
 ## Basic Usage Process
 
 1. Prepare Excel/CSV configuration files, fill in data according to the specified format
