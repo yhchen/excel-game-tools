@@ -49,6 +49,8 @@ docs/knowledge-base/index.md
 
 架构页记录真实数据流：CLI 参数解析进入 `src/index.ts`，配置由 `src/config.ts` 基于 `src/config_tpl.json` 初始化，Excel/CSV 由 `src/loader/*` 读取，表格处理集中在 `src/excel_utils.ts` 的三步流程，类型解析和校验由 `src/TypeDefParser.ts` 执行，输出由 `src/export/export_to_*.ts` 实现。
 
+`TypeDef` 应描述为项目的类型系统和校验 DSL：它既负责把 Excel 单元格字符串转换成强类型数据，也负责表达跨列/跨表引用、默认值、自定义校验和导出时需要的结构信息。
+
 常见任务页至少覆盖新增导出格式、修改类型解析、调整 Excel/CSV 读取、更新配置模板和维护 fixtures。每个任务应指向相关文件、最小编辑面和验证步骤。
 
 验证页明确记录：`npm test` 当前是默认失败脚本；主要验证路径是 `npm run build`，以及构建后运行 `node dist/index.js -c src/config_tpl.json -t testcase/typeDef.js` 检查 fixtures 输出。
