@@ -6,6 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Excel-game-tools is a TypeScript/Node.js CLI tool that exports Excel/CSV game configuration data to multiple output formats (JSON, JS, Lua, Go, Proto2, Proto3, C#) with a powerful type-checking system.
 
+## Project Knowledge Base
+
+Long-term project memory for AI-assisted development lives in `docs/knowledge-base/index.md`. Read it before changing loaders, parsers, TypeDef behavior, exporters, validation flows, or generated-output rules.
+
 ## Build & Run
 
 ```bash
