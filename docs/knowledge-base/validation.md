@@ -12,15 +12,25 @@
 
 ## Facts
 
-`npm test` 当前是默认失败脚本：
+`npm test` is the primary fixture validation command:
 
 ```bash
 npm test
 ```
 
-预期结果是输出 `Error: no test specified` 并退出失败。不要把它当作可用测试套件。
+Expected behavior: build `TypeDef/`, build the main TypeScript project, run the fixture CLI against `testcase/`, and check representative generated outputs under `testcase/exports/`.
 
 ## Workflow / Checklist
+
+### Primary fixture validation
+
+Run:
+
+```bash
+npm test
+```
+
+Expected behavior: executes `scripts/verify-fixtures.js`, which runs `npm run build`, runs the fixture CLI, checks representative generated outputs, parses JSON outputs, and verifies proto syntax markers.
 
 ### 构建验证
 

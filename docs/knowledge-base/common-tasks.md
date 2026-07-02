@@ -52,9 +52,10 @@
 任务完成后至少运行：
 
 ```bash
-npm run build
-node dist/index.js -c src/config_tpl.json -t testcase/typeDef.js
+npm test
 ```
+
+`npm test` wraps `npm run build` and `node dist/index.js -c src/config_tpl.json -t testcase/typeDef.js`, then checks representative generated outputs.
 
 ## Update triggers
 
