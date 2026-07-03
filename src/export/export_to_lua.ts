@@ -1,31 +1,8 @@
 import * as utils from "../utils";
-import fs = require('fs');
 import * as path from 'path';
 import * as json_to_lua from 'json_to_lua';
 import { gCfg } from "../config";
-
-function ParseJsonObject(exportWrapper: utils.IExportWrapper, header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow, rootNode: any, exportCfg: utils.ExportCfg) {
-	if (sheetRow.type != utils.ESheetRowType.data)
-		return;
-	let item: any = {};
-	for (let i = 0, cIdx = header[0].cIdx; i < header.length && cIdx < sheetRow.values.length; ++i, cIdx = header[i]?.cIdx) {
-		const hdr = header[i];
-		if (!hdr || hdr.isComment) continue;
-		const name = exportWrapper.TranslateColName(hdr.name);
-		const val = sheetRow.values[cIdx];
-		if (val != null) {
-			item[name] = val;
-		} else if (exportCfg.UseDefaultValueIfEmpty) {
-			if (hdr.parser.DefaultValue != undefined) {
-				item[name] = hdr.parser.DefaultValue;
-			}
-		}
-		if (i == 0) {
-			rootNode["ids"].push(item[name]);
-		}
-	}
-	rootNode[sheetRow.values[header[0].cIdx]] = item;
-}
+import * as export_common from "./export_common";
 
 type IExportToSingleLuaData = {
 	head: string;
@@ -48,7 +25,7 @@ function exportToSingleLuaContent(exportWrapper: utils.IExportWrapper, sheetName
 	}
 	const headContent = headLst.join(LF);
 	const tableLst = new Array<string>();
-	for (let id of jsObj["ids"]) {
+	for (let id of jsObj["_ids"]) {
 		const objLst = new Array<string>();
 		const jsObjSingle = jsObj[id];
 		for (const hdr of header) {
@@ -67,30 +44,21 @@ class LuaExport extends utils.IExportWrapper {
 	public get DefaultExtName(): string { return '.lua'; }
 	protected async ExportTo(dt: utils.SheetDataTable): Promise<boolean> {
 		const LF = gCfg.LineBreak;
-		let jsonObj = { ids: [] };
+		let jsonObj = { _ids: [] };
 		const arrExportHeader = utils.ExecGroupFilter(dt.sheetName, this._exportCfg.GroupFilter, dt.arrTypeHeader);
 		if (arrExportHeader.length <= 0) {
 			utils.debug(`Pass Sheet ${utils.yellow_ul(dt.sheetName)} : No Column To Export.`);
 			return true;
 		}
 		for (let row of dt.arrValues) {
-			ParseJsonObject(this, arrExportHeader, row, jsonObj, this._exportCfg);
+			export_common.buildRowObject(this, arrExportHeader, row, jsonObj, this._exportCfg);
 		}
 		if (this.isExportToFile()) {
 			this._globalObj[dt.sheetName] = jsonObj;
 			return true;
 		}
 
-		let FMT: string | undefined = this._exportCfg.ExportTemple;
-		if (FMT == undefined) {
-			utils.exception(`[Config Error] ${utils.yellow_ul("Export.ExportTemple")} not defined!`);
-		}
-		if (FMT.indexOf('{data}') < 0) {
-			utils.exception(`[Config Error] ${utils.yellow_ul("Export.ExportTemple")} not found Keyword ${utils.yellow_ul("{data}")}!`);
-		}
-		if (FMT.indexOf('{name}') < 0) {
-			utils.exception(`[Config Error] ${utils.yellow_ul("Export.ExportTemple")} not found Keyword ${utils.yellow_ul("{name}")}!`);
-		}
+		const FMT = export_common.assertExportTemplate(this._exportCfg.ExportTemple, true);
 		try {
 			const dataCtx = exportToSingleLuaContent(this, dt.sheetName, arrExportHeader, jsonObj, this._exportCfg.UseShortName);
 			const NameRex = new RegExp('{name}', 'g');
@@ -99,9 +67,7 @@ class LuaExport extends utils.IExportWrapper {
 				luacontent = `${dataCtx.head}${LF}${luacontent}`;
 			}
 			const outfile = this.getOutputFilePath(dt.sheetName);
-			await fs.promises.writeFile(outfile, luacontent, { encoding: 'utf8', flag: 'w+' });
-			utils.debug(`${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(outfile)}". `
-				+ `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
+			await export_common.writeExportFile(outfile, luacontent);
 		} catch (ex) {
 			utils.exception(`${ex}`);
 		}
@@ -115,17 +81,9 @@ class LuaExport extends utils.IExportWrapper {
 		if (!this.CreateDir(path.dirname(outdir))) {
 			utils.exception(`create output path "${utils.yellow_ul(path.dirname(outdir))}" failure!`);
 		}
-		let FMT: string | undefined = this._exportCfg.ExportTemple;
-		if (FMT == undefined) {
-			utils.exception(`[Config Error] ${utils.yellow_ul("Export.ExportTemple")} not defined!`);
-		}
-		if (FMT.indexOf('{data}') < 0) {
-			utils.exception(`[Config Error] ${utils.yellow_ul("Export.ExportTemple")} not found Keyword ${utils.yellow_ul("{data}")}!`);
-		}
+		const FMT = export_common.assertExportTemplate(this._exportCfg.ExportTemple, false);
 		const luacontent = FMT.replace("{data}", json_to_lua.jsObjectToLuaPretty(this._globalObj, 3));
-		await fs.promises.writeFile(outdir, luacontent, { encoding: 'utf8', flag: 'w+' });
-		utils.debug(`${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(outdir)}". `
-			+ `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
+		await export_common.writeExportFile(outdir, luacontent);
 		return true;
 	}
 
