@@ -1,0 +1,5 @@
+#,bad group
+,id,name
+$,*,Z
+*,int<!!>,string
+,1,bad-group

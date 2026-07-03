@@ -1,0 +1,5 @@
+#,generated fixture
+,id,sourceId
+$,*,*
+*,int<!!>,RefSource.id
+,1,999

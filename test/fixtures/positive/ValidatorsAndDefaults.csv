@@ -1,0 +1,6 @@
+#,generated fixture
+,id,requiredUnique,nonZeroUnique,requiredNonZeroUnique,defaultRequired,defaultStringRequired,enumDefault,floatNonZero,boolValue
+$,*,*,*,*,*,*,*,*,*
+*,int<!!>,string<!N;!!>,int<!0;!!>,int<!N;!0;!!>,IntDefault5<!N>,StringDefaultX<!N>,EnumDefaultEquip,float<!0>,bool
+,1,alpha,10,20,,,,0.5,false
+,2,beta,11,21,6,provided,1,1.25,true

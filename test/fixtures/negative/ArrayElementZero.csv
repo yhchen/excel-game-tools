@@ -1,0 +1,5 @@
+#,generated fixture
+,id,values
+$,*,*
+*,int<!!>,IntArrayNonZero
+,1,"1,0,2"

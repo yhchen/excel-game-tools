@@ -1,0 +1,6 @@
+#,generated fixture
+,id,code
+$,*,*
+*,int<!!>,string<!N;!!>
+,1,dup
+,2,dup

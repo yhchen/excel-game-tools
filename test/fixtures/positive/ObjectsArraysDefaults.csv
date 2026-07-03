@@ -1,0 +1,6 @@
+#,generated fixture
+,id,position,objectArray,jsonData
+$,*,*,*,*
+*,int<!!>,PositionWithDefaults,ObjectArrayWithDefaults,JsonWithDefaults
+,1,10,"100;200,2","{""value"":""present""}"
+,2,"20,30,custom","300;400,4","{""key"":9,""value"":""explicit""}"

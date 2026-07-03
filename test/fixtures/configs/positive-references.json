@@ -1,0 +1,34 @@
+{
+  "IncludeFilesAndPath": [
+    "./test/fixtures/positive/RefSource.csv",
+    "./test/fixtures/positive/RefUsers.csv"
+  ],
+  "GroupMap": {
+    "*": "(All) Default value",
+    "A": "All test",
+    "S": "Server",
+    "C": "Client"
+  },
+  "Export": [
+    {
+      "type": "json",
+      "OutputDir": "./test/tmp/positive-references/",
+      "GroupFilter": [
+        "*"
+      ],
+      "UseDefaultValueIfEmpty": true
+    }
+  ],
+  "DateFmt": "YYYY/MM/DD HH:mm:ss",
+  "TypeCheckerJSFilePath": "./test/fixtures/typeDefs/reference-typeDef.js",
+  "TinyDateFmt": "YYYY/MM/DD",
+  "TimeStampUseMS": true,
+  "LineBreak": "\n",
+  "FractionDigitsFMT": 6,
+  "EnableDebugOutput": false,
+  "ArraySpliter": [
+    ",",
+    ";",
+    "\n"
+  ]
+}

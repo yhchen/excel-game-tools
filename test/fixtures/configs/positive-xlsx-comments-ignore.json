@@ -1,0 +1,33 @@
+{
+  "IncludeFilesAndPath": [
+    "./test/fixtures/positive/XlsxCommentsAndIgnore.xlsx"
+  ],
+  "GroupMap": {
+    "*": "(All) Default value",
+    "A": "All test",
+    "S": "Server",
+    "C": "Client"
+  },
+  "Export": [
+    {
+      "type": "json",
+      "OutputDir": "./test/tmp/positive-xlsx-comments-ignore/",
+      "GroupFilter": [
+        "*"
+      ],
+      "UseDefaultValueIfEmpty": true
+    }
+  ],
+  "DateFmt": "YYYY/MM/DD HH:mm:ss",
+  "TypeCheckerJSFilePath": "./test/fixtures/typeDefs/positive-typeDef.js",
+  "TinyDateFmt": "YYYY/MM/DD",
+  "TimeStampUseMS": true,
+  "LineBreak": "\n",
+  "FractionDigitsFMT": 6,
+  "EnableDebugOutput": false,
+  "ArraySpliter": [
+    ",",
+    ";",
+    "\n"
+  ]
+}

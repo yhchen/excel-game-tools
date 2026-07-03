@@ -1,0 +1,5 @@
+#,generated fixture
+,id,position
+$,*,*
+*,int<!!>,PositionWithRequiredName
+,1,100

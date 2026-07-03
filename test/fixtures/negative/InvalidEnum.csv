@@ -1,0 +1,5 @@
+#,generated fixture
+,id,kind
+$,*,*
+*,int<!!>,TestEnum
+,1,999

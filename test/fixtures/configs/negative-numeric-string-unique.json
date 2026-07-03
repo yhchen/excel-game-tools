@@ -1,0 +1,33 @@
+{
+  "IncludeFilesAndPath": [
+    "./test/fixtures/negative/NumericStringUnique.csv"
+  ],
+  "GroupMap": {
+    "*": "(All) Default value",
+    "A": "All test",
+    "S": "Server",
+    "C": "Client"
+  },
+  "Export": [
+    {
+      "type": "json",
+      "OutputDir": "./test/tmp/negative-numeric-string-unique/",
+      "GroupFilter": [
+        "*"
+      ],
+      "UseDefaultValueIfEmpty": true
+    }
+  ],
+  "DateFmt": "YYYY/MM/DD HH:mm:ss",
+  "TypeCheckerJSFilePath": "./test/fixtures/typeDefs/positive-typeDef.js",
+  "TinyDateFmt": "YYYY/MM/DD",
+  "TimeStampUseMS": true,
+  "LineBreak": "\n",
+  "FractionDigitsFMT": 6,
+  "EnableDebugOutput": false,
+  "ArraySpliter": [
+    ",",
+    ";",
+    "\n"
+  ]
+}

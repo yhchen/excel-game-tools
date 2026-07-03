@@ -1,0 +1,6 @@
+#,generated fixture
+,id,intValue,uintValue,floatValue,doubleValue,stringValue,boolValue,dateValue,tinyDateValue,enumValue
+$,*,*,*,*,*,*,*,*,*,*
+*,int<!!>,int,uint,float,double,string,bool,date,tinydate,TestEnum
+,1,-12,12,1.25,2.5,plain text,true,2026/07/03 12:30:00,2026/07/03,1
+,2,,,,,,,,,

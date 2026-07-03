@@ -1,0 +1,5 @@
+#,generated fixture
+,id,jsonData
+$,*,*
+*,int<!!>,JsonWithDefaults
+,1,"{""key"":2}"

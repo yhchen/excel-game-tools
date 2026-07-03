@@ -1,0 +1,7 @@
+#,generated fixture
+,id,ints,matrix,cube,fixedPair,vector,nonZeroInts
+$,*,*,*,*,*,*,*
+*,int<!!>,int[],int[][],int[][][],int[2],Vector2Fixed,IntArrayNonZero
+,1,"1,2,3","1,2;3,4","1,2;3,4
+5,6;7,8","9,10","1.5,2.5","3,4,5"
+,2,,,,"11,12","3.5,4.5","6,7"

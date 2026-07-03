@@ -1,0 +1,5 @@
+#,generated fixture
+,id,requiredName
+$,*,*
+*,int<!!>,string<!N>
+,1,

@@ -1,0 +1,7 @@
+#,group comments,,,
+,id,serverOnly,clientOnly,#CommentColumn
+$,*,S,C,*
+*,int<!!>,string,string,string
+#,comment row,,,
+,1,server-a,client-a,hidden
+,2,server-b,client-b,hidden
