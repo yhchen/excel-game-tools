@@ -1,6 +1,6 @@
 {
   "IncludeFilesAndPath": [
-    "./test/fixtures/negative/WhitespaceRequired.csv"
+    "./test/fixtures/positive/Characterization.csv"
   ],
   "GroupMap": {
     "*": "(All) Default value",
@@ -11,17 +11,20 @@
   "Export": [
     {
       "type": "json",
-      "OutputDir": "./test/tmp/negative-whitespace-required/",
+      "OutputDir": "./test/tmp/positive-characterization/",
       "GroupFilter": [
         "*"
       ],
       "UseDefaultValueIfEmpty": true
     }
   ],
+  "see: http://momentjs.com/docs/#/parsing/string-format/": null,
   "DateFmt": "YYYY/MM/DD HH:mm:ss",
+  "cm21": "relative to ${cwd} or absolute path",
   "TypeCheckerJSFilePath": "./test/fixtures/typeDefs/positive-typeDef.js",
   "TinyDateFmt": "YYYY/MM/DD",
   "TimeStampUseMS": true,
+  "cm22": "custom defined data, can be null",
   "LineBreak": "\n",
   "FractionDigitsFMT": 6,
   "EnableDebugOutput": false,

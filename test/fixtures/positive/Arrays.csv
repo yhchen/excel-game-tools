@@ -1,4 +1,4 @@
-#,generated fixture
+#,generated fixture,,,,,,
 ,id,ints,matrix,cube,fixedPair,vector,nonZeroInts
 $,*,*,*,*,*,*,*
 *,int<!!>,int[],int[][],int[][][],int[2],Vector2Fixed,IntArrayNonZero

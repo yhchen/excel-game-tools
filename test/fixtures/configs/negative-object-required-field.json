@@ -18,10 +18,13 @@
       "UseDefaultValueIfEmpty": true
     }
   ],
+  "see: http://momentjs.com/docs/#/parsing/string-format/": null,
   "DateFmt": "YYYY/MM/DD HH:mm:ss",
+  "cm21": "relative to ${cwd} or absolute path",
   "TypeCheckerJSFilePath": "./test/fixtures/typeDefs/positive-typeDef.js",
   "TinyDateFmt": "YYYY/MM/DD",
   "TimeStampUseMS": true,
+  "cm22": "custom defined data, can be null",
   "LineBreak": "\n",
   "FractionDigitsFMT": 6,
   "EnableDebugOutput": false,

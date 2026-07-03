@@ -16,6 +16,11 @@ function ensureDir(dir) {
 	fs.mkdirSync(dir, { recursive: true });
 }
 
+function resetDir(dir) {
+	fs.rmSync(dir, { recursive: true, force: true });
+	ensureDir(dir);
+}
+
 function writeFile(filePath, content) {
 	ensureDir(path.dirname(filePath));
 	fs.writeFileSync(filePath, content, 'utf8');
@@ -36,8 +41,9 @@ function csv(rows) {
 }
 
 function tableRows(header, groups, types, dataRows, comment = 'generated fixture') {
+	const commentRow = ['#', comment].concat(new Array(header.length - 1).fill(''));
 	return [
-		['#', comment],
+		commentRow,
 		[''].concat(header),
 		['$'].concat(groups),
 		['*'].concat(types),
@@ -59,10 +65,13 @@ function config(caseName, includePath, typeDefName = 'positive-typeDef.js', grou
 			GroupFilter: groupFilter,
 			UseDefaultValueIfEmpty: true
 		}],
+		'see: http://momentjs.com/docs/#/parsing/string-format/': null,
 		DateFmt: 'YYYY/MM/DD HH:mm:ss',
+		cm21: 'relative to ${cwd} or absolute path',
 		TypeCheckerJSFilePath: `./test/fixtures/typeDefs/${typeDefName}`,
 		TinyDateFmt: 'YYYY/MM/DD',
 		TimeStampUseMS: true,
+		cm22: 'custom defined data, can be null',
 		LineBreak: '\n',
 		FractionDigitsFMT: 6,
 		EnableDebugOutput: false,
@@ -207,6 +216,16 @@ function writePositiveCsvFixtures() {
 		]
 	)));
 
+	writeFile(path.join(positiveDir, 'Characterization.csv'), csv(tableRows(
+		['id', 'whitespaceRequired', 'enumNameValue'],
+		['*', '*', '*'],
+		['int<!!>', 'string<!N>', 'TestEnum'],
+		[
+			['1', '   ', 'Item']
+		],
+		'current behavior characterization'
+	)));
+
 	writeFile(path.join(positiveDir, 'RefSource.csv'), csv(tableRows(
 		['id', 'name'],
 		['*', '*'],
@@ -238,7 +257,7 @@ function writeNegativeCsvFixtures() {
 		'CombinedRequiredUniqueDuplicate.csv': tableRows(['id', 'code'], ['*', '*'], ['int<!!>', 'string<!N;!!>'], [['1', 'dup'], ['2', 'dup']]),
 		'InvalidEnum.csv': tableRows(['id', 'kind'], ['*', '*'], ['int<!!>', 'TestEnum'], [['1', '999']]),
 		'InvalidGroup.csv': [
-			['#', 'bad group'],
+			['#', 'bad group', ''],
 			['', 'id', 'name'],
 			['$', '*', 'Z'],
 			['*', 'int<!!>', 'string'],
@@ -246,14 +265,12 @@ function writeNegativeCsvFixtures() {
 		],
 		'FixedArrayLength.csv': tableRows(['id', 'pair'], ['*', '*'], ['int<!!>', 'int[2]'], [['1', '1,2,3']]),
 		'ObjectRequiredField.csv': tableRows(['id', 'position'], ['*', '*'], ['int<!!>', 'PositionWithRequiredName'], [['1', '100']]),
-		'ObjectDefaultNonzero.csv': tableRows(['id', 'payload'], ['*', '*'], ['int<!!>', 'ObjectDefaultZeroNonZero'], [['1', '']]),
+		'ObjectDefaultNonzero.csv': tableRows(['id', 'payload'], ['*', '*'], ['int<!!>', 'ObjectDefaultZeroNonZero'], [['1', '0']]),
 		'JsonInvalidSyntax.csv': tableRows(['id', 'jsonData'], ['*', '*'], ['int<!!>', 'JsonWithDefaults'], [['1', '{"value":']]),
-		'JsonRequiredField.csv': tableRows(['id', 'jsonData'], ['*', '*'], ['int<!!>', 'JsonWithDefaults'], [['1', '{"key":2}']]),
+		'JsonRequiredField.csv': tableRows(['id', 'jsonData'], ['*', '*'], ['int<!!>', 'JsonWithDefaults'], [['1', '{"key":2,"value":""}']]),
 		'ArrayElementZero.csv': tableRows(['id', 'values'], ['*', '*'], ['int<!!>', 'IntArrayNonZero'], [['1', '1,0,2']]),
 		'CombinedUniqueRequiredEmpty.csv': tableRows(['id', 'code'], ['*', '*'], ['int<!!>', 'string<!!;!N>'], [['1', '']]),
-		'WhitespaceRequired.csv': tableRows(['id', 'code'], ['*', '*'], ['int<!!>', 'string<!N>'], [['1', '   ']]),
 		'NumericStringUnique.csv': tableRows(['id', 'code'], ['*', '*'], ['int<!!>', 'int<!!>'], [['1', '1'], ['2', 1]]),
-		'EnumNameLike.csv': tableRows(['id', 'kind'], ['*', '*'], ['int<!!>', 'TestEnum'], [['1', 'Item']]),
 		'InvalidReference.csv': tableRows(['id', 'sourceId'], ['*', '*'], ['int<!!>', 'RefSource.id'], [['1', '999']])
 	};
 	for (const [fileName, rows] of Object.entries(cases)) {
@@ -308,6 +325,7 @@ function writeConfigs() {
 		['positive-groups-client', './test/fixtures/positive/Groups.csv', 'positive-typeDef.js', ['C', '*']],
 		['positive-validators-defaults', './test/fixtures/positive/ValidatorsAndDefaults.csv', 'positive-typeDef.js'],
 		['positive-objects-arrays-defaults', './test/fixtures/positive/ObjectsArraysDefaults.csv', 'positive-typeDef.js'],
+		['positive-characterization', './test/fixtures/positive/Characterization.csv', 'positive-typeDef.js'],
 		['positive-xlsx-merged-arrays', './test/fixtures/positive/XlsxMergedArrays.xlsx', 'positive-typeDef.js'],
 		['positive-xlsx-comments-ignore', './test/fixtures/positive/XlsxCommentsAndIgnore.xlsx', 'positive-typeDef.js']
 	];
@@ -332,7 +350,7 @@ function writeConfigs() {
 }
 
 for (const dir of [positiveDir, negativeDir, configDir, typeDefDir]) {
-	ensureDir(dir);
+	resetDir(dir);
 }
 
 writeTypeDefs();

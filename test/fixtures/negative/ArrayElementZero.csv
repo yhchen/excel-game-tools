@@ -1,4 +1,4 @@
-#,generated fixture
+#,generated fixture,
 ,id,values
 $,*,*
 *,int<!!>,IntArrayNonZero

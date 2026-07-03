@@ -1,0 +1,5 @@
+#,current behavior characterization,,
+,id,whitespaceRequired,enumNameValue
+$,*,*,*
+*,int<!!>,string<!N>,TestEnum
+,1,   ,Item

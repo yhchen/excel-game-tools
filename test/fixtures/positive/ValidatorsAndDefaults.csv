@@ -1,4 +1,4 @@
-#,generated fixture
+#,generated fixture,,,,,,,,
 ,id,requiredUnique,nonZeroUnique,requiredNonZeroUnique,defaultRequired,defaultStringRequired,enumDefault,floatNonZero,boolValue
 $,*,*,*,*,*,*,*,*,*
 *,int<!!>,string<!N;!!>,int<!0;!!>,int<!N;!0;!!>,IntDefault5<!N>,StringDefaultX<!N>,EnumDefaultEquip,float<!0>,bool

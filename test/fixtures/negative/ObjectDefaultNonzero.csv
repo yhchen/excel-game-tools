@@ -1,5 +1,5 @@
-#,generated fixture
+#,generated fixture,
 ,id,payload
 $,*,*
 *,int<!!>,ObjectDefaultZeroNonZero
-,1,
+,1,0

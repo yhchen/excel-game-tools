@@ -1,4 +1,4 @@
-#,generated fixture
+#,generated fixture,
 ,id,name
 $,*,*
 *,int<!!>,string<!N>

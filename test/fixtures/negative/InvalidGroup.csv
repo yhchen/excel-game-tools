@@ -1,4 +1,4 @@
-#,bad group
+#,bad group,
 ,id,name
 $,*,Z
 *,int<!!>,string
