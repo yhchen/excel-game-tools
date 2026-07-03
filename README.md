@@ -15,7 +15,7 @@ Main features:
 ## Installation and Environment Setup
 
 ### Requirements
-- Node.js environment
+- Node.js 22 or newer
 - TypeScript support
 
 ### Installation Steps
@@ -23,8 +23,10 @@ Main features:
 1. Clone or download the project code
 2. Install dependencies:
 ```bash
-npm install
+npm ci
 ```
+For reproducible local setup and CI-like validation, prefer `npm ci`. Use `npm install` when intentionally changing dependencies. Commit `package.json` and `package-lock.json` together for dependency changes.
+
 3. Compile the project:
 ```bash
 npm run build
@@ -33,7 +35,7 @@ npm run build
 ```bash
 npm run pkg
 ```
-This generates binaries in the `bin/` directory.
+This generates binaries in the `bin/` directory. `npm run pkg` builds Node 22 standalone binaries for Linux, macOS, and Windows through `@yao-pkg/pkg`.
 
 ### Validation
 

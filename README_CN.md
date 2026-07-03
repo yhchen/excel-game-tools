@@ -15,7 +15,7 @@
 ## 安装和环境配置
 
 ### 环境要求
-- Node.js 环境
+- Node.js 22 或更新版本
 - TypeScript 支持
 
 ### 安装步骤
@@ -23,8 +23,10 @@
 1. 克隆或下载项目代码
 2. 安装依赖包：
 ```bash
-npm install
+npm ci
 ```
+为了获得可复现的本地安装和接近 CI 的验证环境，优先使用 `npm ci`。只有在有意新增、删除或升级依赖时才使用 `npm install`。依赖变更需要同时提交 `package.json` 和 `package-lock.json`。
+
 3. 编译项目：
 ```bash
 npm run build
@@ -33,7 +35,7 @@ npm run build
 ```bash
 npm run pkg
 ```
-这会在 `bin/` 目录下生成各个平台的可执行文件。
+这会在 `bin/` 目录下生成各个平台的可执行文件。`npm run pkg` 通过 `@yao-pkg/pkg` 构建 Node 22 的 Linux、macOS 和 Windows 独立可执行文件。
 
 ### 验证
 

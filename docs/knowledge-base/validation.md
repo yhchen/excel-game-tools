@@ -22,6 +22,18 @@ Expected behavior: build `TypeDef/`, build the main TypeScript project, run the 
 
 ## Workflow / Checklist
 
+### Install dependencies
+
+Use Node.js 22 or newer.
+
+Run:
+
+```bash
+npm ci
+```
+
+Expected behavior: installs exactly the dependency tree recorded in `package-lock.json`.
+
 ### Primary fixture validation
 
 Run:
@@ -61,6 +73,16 @@ npm run pkg
 ```
 
 预期行为：使用 `pkg` 生成 Linux、macOS、Windows 可执行文件到 `bin/`。
+
+### Package artifact validation
+
+After `npm run pkg`, run:
+
+```bash
+npm run verify:pkg
+```
+
+Expected behavior: verifies non-empty Linux, macOS, and Windows package artifacts under `bin/` and, on macOS, runs the packaged binary against the bundled fixtures with external `testcase/typeDef.js`.
 
 ## Validation
 

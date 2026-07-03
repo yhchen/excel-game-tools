@@ -57,6 +57,15 @@ npm test
 
 `npm test` wraps `npm run build` and `node dist/index.js -c src/config_tpl.json -t testcase/typeDef.js`, then checks representative generated outputs.
 
+Dependency or packaging changes must also run:
+
+```bash
+npm audit --omit=dev
+npm audit
+npm run pkg
+npm run verify:pkg
+```
+
 ## Update triggers
 
 新增常见任务、改动导出注册方式、改动 TypeDef DSL、改动 loader 接口或新增 fixture 流程时更新本页。

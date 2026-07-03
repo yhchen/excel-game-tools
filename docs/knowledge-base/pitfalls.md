@@ -22,6 +22,10 @@
 
 `dist/`、`bin/` 和 `testcase/exports/` 是生成输出或打包输出。提交前检查 diff，避免混入本地实验产物。
 
+`package-lock.json` is intentionally tracked. Use `npm ci` for ordinary setup and validation; use `npm install` only for intentional dependency changes, then review and commit the lockfile with `package.json`.
+
+`npm run pkg` uses `@yao-pkg/pkg` on the Node 22 baseline. Package changes must preserve dynamic external `typeDef.js` loading and should be verified with `npm run verify:pkg`.
+
 ## Workflow / Checklist
 
 修改高风险区域前：
