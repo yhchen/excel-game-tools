@@ -39,13 +39,13 @@ npm run pkg
 
 ### 验证
 
-修改 loader、parser、TypeDef 行为、exporter 或生成输出规则前后，运行 fixture 验证命令：
+修改 loader、parser、TypeDef 行为、exporter 或生成输出规则前后，运行完整验证：
 
 ```bash
 npm test
 ```
 
-该命令会构建 TypeDef 包和主项目，运行内置 fixtures，并检查代表性生成输出。
+该命令会构建 TypeDef 包和主项目，运行 Node 内置测试，运行专用 CLI fixture 测试，并验证仓库自带的 `testcase/` fixtures。不需要额外测试框架依赖。
 
 ## 基本使用流程
 

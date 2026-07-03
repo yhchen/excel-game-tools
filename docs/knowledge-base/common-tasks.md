@@ -12,7 +12,7 @@
 
 ## Facts
 
-新增能力时优先沿用现有模式，避免引入新依赖。核心修改通常落在 `src/export/*`、`src/excel_utils.ts`、`src/TypeDefParser.ts`、`src/config_tpl.json` 或 `testcase/`。
+新增能力时优先沿用现有模式，避免引入新依赖。核心修改通常落在 `src/export/*`、`src/excel_utils.ts`、`src/TypeDefParser.ts`、`src/config_tpl.json`、`test/fixtures/` 或 `testcase/`。
 
 ## Workflow / Checklist
 
@@ -22,7 +22,7 @@
 2. 实现 `utils.IExportWrapper` 兼容类，提供单表导出和全局导出行为。
 3. 在 `src/utils.ts` 的 `ExportWrapperMap` 注册新 `type`。
 4. 在 `src/config_tpl.json` 增加示例配置。
-5. 用 `testcase/` fixture 运行 CLI，确认输出路径和内容。
+5. 在 `test/fixtures/` 添加或更新 focused fixture 和 `test/integration/cli-fixtures.test.js` 断言。
 6. 更新 README 或知识库中支持格式列表。
 
 ### 修改类型解析
@@ -31,7 +31,8 @@
 2. 判断变化属于基础类型、数组/对象结构、列引用、自定义校验还是导出结构信息。
 3. 保持 `TypeDef` 作为类型系统和校验 DSL 的定位。
 4. 更新 `testcase/typeDef.ts` 和 `testcase/typeDef.js` 中对应示例。
-5. 运行 `npm run build` 和 fixture CLI。
+5. 在 `test/fixtures/` 添加或更新 focused fixture 和 `test/integration/cli-fixtures.test.js` 断言。
+6. 运行 `npm test`。
 
 ### 修改 Excel/CSV 读取
 
@@ -39,6 +40,7 @@
 2. Excel 行/列语义优先在 `src/excel_utils.ts` 处理，不把业务规则塞进 loader。
 3. CSV 与 Excel 应尽量走相同 `HandleDataTable` 流程。
 4. 涉及合并单元格时检查 `MergeArrayCells` 和 header `colspan` 行为。
+5. 使用 `test/fixtures/scripts/generate-fixtures.js` 添加或更新 CSV/XLSX fixture，确保二进制 XLSX 可复现。
 
 ### 更新配置模板
 
@@ -56,6 +58,7 @@ npm test
 ```
 
 `npm test` wraps `npm run build` and `node dist/index.js -c src/config_tpl.json -t testcase/typeDef.js`, then checks representative generated outputs.
+It also runs Node built-in unit tests and dedicated CLI integration fixtures under `test/fixtures/`.
 
 Dependency or packaging changes must also run:
 

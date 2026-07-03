@@ -12,13 +12,13 @@
 
 ## Facts
 
-`npm test` is the primary fixture validation command:
+`npm test` is the primary validation command:
 
 ```bash
 npm test
 ```
 
-Expected behavior: build `TypeDef/`, build the main TypeScript project, run the fixture CLI against `testcase/`, and check representative generated outputs under `testcase/exports/`.
+Expected behavior: build `TypeDef/`, build the main TypeScript project, run Node built-in unit tests, run dedicated CLI integration fixtures under `test/fixtures/`, then run the bundled `testcase/` fixture verification and check representative generated outputs under `testcase/exports/`.
 
 ## Workflow / Checklist
 
@@ -34,7 +34,7 @@ npm ci
 
 Expected behavior: installs exactly the dependency tree recorded in `package-lock.json`.
 
-### Primary fixture validation
+### Primary validation
 
 Run:
 
@@ -42,7 +42,17 @@ Run:
 npm test
 ```
 
-Expected behavior: executes `scripts/verify-fixtures.js`, which runs `npm run build`, runs the fixture CLI, checks representative generated outputs, parses JSON outputs, and verifies proto syntax markers.
+Expected behavior: executes `scripts/run-tests.js`, which runs `npm run build`, runs Node built-in `node:test` unit tests, runs dedicated CLI integration fixtures under `test/fixtures/`, and then executes `scripts/verify-fixtures.js`.
+
+For focused loops, run:
+
+```bash
+npm run test:unit
+npm run test:integration
+npm run verify:fixtures
+```
+
+`test/tmp/` is generated output and should not be committed.
 
 ### 构建验证
 

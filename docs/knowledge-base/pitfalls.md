@@ -26,6 +26,10 @@
 
 `npm run pkg` uses `@yao-pkg/pkg` on the Node 22 baseline. Package changes must preserve dynamic external `typeDef.js` loading and should be verified with `npm run verify:pkg`.
 
+The CLI and parser use process-level global state such as `gCfg`, `ExportExcelDataMap`, and `TypeDefParser.InitFlag`. Integration tests should run `dist/index.js` in child processes instead of importing and calling `execute()` repeatedly in the same process.
+
+`test/tmp/` contains generated test output. Commit fixture inputs, fixture generation scripts, and tests, not generated test output.
+
 ## Workflow / Checklist
 
 修改高风险区域前：
@@ -33,7 +37,7 @@
 1. 读对应源码和本页。
 2. 写下预期不变行为。
 3. 运行 `npm run build`。
-4. 运行 fixture CLI。
+4. 运行 `npm run test:integration` 或 fixture CLI。
 5. 对比生成输出是否符合预期。
 
 ## Validation

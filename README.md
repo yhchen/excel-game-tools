@@ -39,13 +39,13 @@ This generates binaries in the `bin/` directory. `npm run pkg` builds Node 22 st
 
 ### Validation
 
-Run the fixture validation command before changing loaders, parsers, TypeDef behavior, exporters, or generated-output rules:
+Run the full validation suite before changing loaders, parsers, TypeDef behavior, exporters, or generated-output rules:
 
 ```bash
 npm test
 ```
 
-This builds the TypeDef package, builds the main project, runs the bundled fixtures, and checks representative generated outputs.
+This builds the TypeDef package and main project, runs Node built-in unit tests, runs dedicated CLI fixture tests, and verifies the bundled `testcase/` fixtures. No separate test framework dependency is required.
 
 ## Basic Usage Process
 
