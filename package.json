@@ -5,7 +5,9 @@
   "bin": "dist/index.js",
   "main": "dist/index.js",
   "scripts": {
-    "test": "npm run verify:fixtures",
+    "test": "node scripts/run-tests.js",
+    "test:unit": "npm run build && node --test test/unit/*.test.js",
+    "test:integration": "npm run build && node --test test/integration/*.test.js",
     "verify:fixtures": "node scripts/verify-fixtures.js",
     "verify:pkg": "node scripts/verify-package-artifacts.js",
     "build": "cd TypeDef && tsc && cd .. && tsc",
