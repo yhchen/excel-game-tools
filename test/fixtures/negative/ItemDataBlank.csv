@@ -1,0 +1,5 @@
+#,generated fixture,
+,id,cost
+$,*,*
+*,int<!!>,ItemData[]<!N>
+,1,

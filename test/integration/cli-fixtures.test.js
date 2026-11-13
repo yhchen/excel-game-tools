@@ -119,6 +119,38 @@ test('positive xlsx merged arrays fixture exports xlsx values', () => {
 	assert.match(String(data['1'].dateValue), /2026|178/);
 });
 
+test('merged ItemData array fills an omitted Level from DVAL', () => {
+	const caseName = 'positive-itemdata-merged-omitted-level';
+	cleanCase(caseName);
+	const result = runCli(config(caseName), typeDef('positive-typeDef.js'));
+	assertSuccess(result);
+	const data = readJson(jsonOutput(caseName, 'EquipLevelUpCostConfig'));
+	assert.deepEqual(data['1'].Cost, [
+		{ Id: 82000005, Count: 18350, Level: 0 },
+		{ Id: 82000006, Count: 400, Level: 0 },
+		{ Id: 82000002, Count: 36700, Level: 0 }
+	]);
+	assert.deepEqual(data['2'].Cost, [
+		{ Id: 82000005, Count: 18240, Level: 0 },
+		{ Id: 82000002, Count: 36480, Level: 0 }
+	]);
+	assert.deepEqual(data['3'].Cost, [
+		{ Id: 82000005, Count: 30, Level: 2 }
+	]);
+});
+
+test('trailing empty object fields use DVAL and holes stay parsed', () => {
+	const caseName = 'positive-tail-default-objects';
+	cleanCase(caseName);
+	const result = runCli(config(caseName), typeDef('positive-typeDef.js'));
+	assertSuccess(result);
+	const data = readJson(jsonOutput(caseName, 'TailDefaultObjects'));
+	assert.deepEqual(data['1'].value, { v1: 1, v2: 'x', v3: 0 });
+	assert.deepEqual(data['2'].value, { v1: 1, v2: '', v3: 5 });
+	assert.deepEqual(data['3'].value, { v1: 1, v2: 'kept', v3: 4 });
+	assert.deepEqual(data['4'].value, { v1: 1, v2: ' ', v3: 0 });
+});
+
 test('positive xlsx comments fixture skips ignored sheets and comments', () => {
 	const caseName = 'positive-xlsx-comments-ignore';
 	cleanCase(caseName);
@@ -146,6 +178,9 @@ const negativeCases = [
 	['negative-object-default-nonzero', /Zero|can not be Zero/i],
 	['negative-object-required-field', /empty|object type parse failure|element count/i],
 	['negative-required-empty', /empty|value can not be empty/i],
+	['negative-required-pair-trailing-empty', /not a number/i],
+	['negative-dval-whitespace-not-default', /not a number/i],
+	['negative-item-data-blank', /value can not be empty/i],
 	['negative-unique-default-duplicate', /duplicate|unique/i],
 	['negative-unique-duplicate', /duplicate|unique/i]
 ];

@@ -46,6 +46,24 @@ function initialize(Sheets, typeDefs) {
 		id: int,
 		count: int.DVAL(1)
 	}));
+	typeDefs.ItemData = def.TObject({
+		Id: int,
+		Count: int,
+		Level: int.DVAL(0)
+	});
+	typeDefs.TailDefaultObject = def.TObject({
+		v1: int,
+		v2: string.DVAL('x'),
+		v3: int.DVAL(0)
+	});
+	typeDefs.RequiredPair = def.TObject({
+		v1: int,
+		v2: int
+	});
+	typeDefs.IntTailDefault = def.TObject({
+		v1: int,
+		v2: int.DVAL(0)
+	});
 	typeDefs.IntArrayNonZero = def.TArray(nonZeroInt);
 	typeDefs.JsonWithDefaults = def.TJson({
 		key: int.DVAL(1),

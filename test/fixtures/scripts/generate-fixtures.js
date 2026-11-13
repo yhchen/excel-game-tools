@@ -50,7 +50,7 @@ function tableRows(header, groups, types, dataRows, comment = 'generated fixture
 	].concat(dataRows.map(row => [''].concat(row)));
 }
 
-function config(caseName, includePath, typeDefName = 'positive-typeDef.js', groupFilter = ['*']) {
+function config(caseName, includePath, typeDefName = 'positive-typeDef.js', groupFilter = ['*'], extra = {}) {
 	return {
 		IncludeFilesAndPath: Array.isArray(includePath) ? includePath : [includePath],
 		GroupMap: {
@@ -75,12 +75,13 @@ function config(caseName, includePath, typeDefName = 'positive-typeDef.js', grou
 		LineBreak: '\n',
 		FractionDigitsFMT: 6,
 		EnableDebugOutput: false,
-		ArraySpliter: [',', ';', '\n']
+		ArraySpliter: [',', ';', '\n'],
+		...extra
 	};
 }
 
-function writeCaseConfig(caseName, includePath, typeDefName = 'positive-typeDef.js', groupFilter = ['*']) {
-	writeJson(path.join(configDir, `${caseName}.json`), config(caseName, includePath, typeDefName, groupFilter));
+function writeCaseConfig(caseName, includePath, typeDefName = 'positive-typeDef.js', groupFilter = ['*'], extra = {}) {
+	writeJson(path.join(configDir, `${caseName}.json`), config(caseName, includePath, typeDefName, groupFilter, extra));
 }
 
 function writeTypeDefs() {
@@ -132,6 +133,24 @@ function initialize(Sheets, typeDefs) {
 		id: int,
 		count: int.DVAL(1)
 	}));
+	typeDefs.ItemData = def.TObject({
+		Id: int,
+		Count: int,
+		Level: int.DVAL(0)
+	});
+	typeDefs.TailDefaultObject = def.TObject({
+		v1: int,
+		v2: string.DVAL('x'),
+		v3: int.DVAL(0)
+	});
+	typeDefs.RequiredPair = def.TObject({
+		v1: int,
+		v2: int
+	});
+	typeDefs.IntTailDefault = def.TObject({
+		v1: int,
+		v2: int.DVAL(0)
+	});
 	typeDefs.IntArrayNonZero = def.TArray(nonZeroInt);
 	typeDefs.JsonWithDefaults = def.TJson({
 		key: int.DVAL(1),
@@ -226,6 +245,18 @@ function writePositiveCsvFixtures() {
 		'current behavior characterization'
 	)));
 
+	writeFile(path.join(positiveDir, 'TailDefaultObjects.csv'), csv(tableRows(
+		['id', 'value'],
+		['*', '*'],
+		['int<!!>', 'TailDefaultObject'],
+		[
+			['1', '1,'],
+			['2', '1,,5'],
+			['3', '1,kept,4'],
+			['4', '1, ,']
+		]
+	)));
+
 	writeFile(path.join(positiveDir, 'RefSource.csv'), csv(tableRows(
 		['id', 'name'],
 		['*', '*'],
@@ -271,7 +302,10 @@ function writeNegativeCsvFixtures() {
 		'ArrayElementZero.csv': tableRows(['id', 'values'], ['*', '*'], ['int<!!>', 'IntArrayNonZero'], [['1', '1,0,2']]),
 		'CombinedUniqueRequiredEmpty.csv': tableRows(['id', 'code'], ['*', '*'], ['int<!!>', 'string<!!;!N>'], [['1', '']]),
 		'NumericStringUnique.csv': tableRows(['id', 'code'], ['*', '*'], ['int<!!>', 'int<!!>'], [['1', '1'], ['2', 1]]),
-		'InvalidReference.csv': tableRows(['id', 'sourceId'], ['*', '*'], ['int<!!>', 'RefSource.id'], [['1', '999']])
+		'InvalidReference.csv': tableRows(['id', 'sourceId'], ['*', '*'], ['int<!!>', 'RefSource.id'], [['1', '999']]),
+		'RequiredPairTrailingEmpty.csv': tableRows(['id', 'pair'], ['*', '*'], ['int<!!>', 'RequiredPair'], [['1', '1,']]),
+		'DvalWhitespaceNotDefault.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'IntTailDefault'], [['1', '1, ']]),
+		'ItemDataBlank.csv': tableRows(['id', 'cost'], ['*', '*'], ['int<!!>', 'ItemData[]<!N>'], [['1', '']])
 	};
 	for (const [fileName, rows] of Object.entries(cases)) {
 		writeFile(path.join(negativeDir, fileName), csv(rows));
@@ -300,6 +334,22 @@ function writeXlsxFixtures() {
 	]);
 	xlsx.writeFile(merged, path.join(positiveDir, 'XlsxMergedArrays.xlsx'), { cellDates: true });
 
+	const itemData = xlsx.utils.book_new();
+	addSheet(itemData, 'EquipLevelUpCostConfig', [
+		['#', 'merged ItemData array omits trailing Level'],
+		['', 'Id', 'Cost', '', ''],
+		['$', '*', '*', '', ''],
+		['*', 'int<!!>', 'ItemData[]<!N>', '', ''],
+		['', 1, '82000005;18350/82000006;400/82000002;36700', '', ''],
+		['', 2, '82000005;18240/82000002;36480', '', ''],
+		['', 3, '82000005;30;2', '', '']
+	], [
+		{ s: { r: 1, c: 2 }, e: { r: 1, c: 4 } },
+		{ s: { r: 2, c: 2 }, e: { r: 2, c: 4 } },
+		{ s: { r: 3, c: 2 }, e: { r: 3, c: 4 } }
+	]);
+	xlsx.writeFile(itemData, path.join(positiveDir, 'ItemDataMergedOmittedLevel.xlsx'));
+
 	const comments = xlsx.utils.book_new();
 	addSheet(comments, 'XlsxCommentsAndIgnore', [
 		['#', 'comment text', '', ''],
@@ -327,10 +377,15 @@ function writeConfigs() {
 		['positive-objects-arrays-defaults', './test/fixtures/positive/ObjectsArraysDefaults.csv', 'positive-typeDef.js'],
 		['positive-characterization', './test/fixtures/positive/Characterization.csv', 'positive-typeDef.js'],
 		['positive-xlsx-merged-arrays', './test/fixtures/positive/XlsxMergedArrays.xlsx', 'positive-typeDef.js'],
+		['positive-itemdata-merged-omitted-level', './test/fixtures/positive/ItemDataMergedOmittedLevel.xlsx', 'positive-typeDef.js'],
+		['positive-tail-default-objects', './test/fixtures/positive/TailDefaultObjects.csv', 'positive-typeDef.js'],
 		['positive-xlsx-comments-ignore', './test/fixtures/positive/XlsxCommentsAndIgnore.xlsx', 'positive-typeDef.js']
 	];
 	for (const [caseName, includePath, typeDefName, groups] of positiveCases) {
-		writeCaseConfig(caseName, includePath, typeDefName, groups || ['*']);
+		const extra = caseName === 'positive-itemdata-merged-omitted-level'
+			? { ArraySpliter: [';', '/', '#'] }
+			: {};
+		writeCaseConfig(caseName, includePath, typeDefName, groups || ['*'], extra);
 	}
 
 	writeCaseConfig('positive-references', [

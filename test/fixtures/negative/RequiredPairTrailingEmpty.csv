@@ -1,0 +1,5 @@
+#,generated fixture,
+,id,pair
+$,*,*
+*,int<!!>,RequiredPair
+,1,"1,"

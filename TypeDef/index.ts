@@ -97,10 +97,12 @@ export namespace def {
             let index = 0;
             const res: any = {};
             for (const k in type) {
-                if (data.length <= index) {
+                const token = data[index];
+                const trailingEmpty = index < data.length && token === '' && data.slice(index + 1).every((item: any) => item === '');
+                if (data.length <= index || (trailingEmpty && type[k].__inner_has_default_value)) {
                     res[k] = type[k].__inner__defaultval__abcxyz__;
                 } else {
-                    res[k] = type[k](data[index]);
+                    res[k] = type[k](token);
                 }
                 ++index;
             }
