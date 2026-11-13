@@ -1,0 +1,7 @@
+#,defaults checkers bounds go and names,,,,,,,,,
+,id,allDefault,checkedInts,checkedJson,one,shortMin,shortMax,plain,matrixTail,named
+//,skipped group comment,,,,,,,,,
+$,*,*,*,*,*,*,*,*,*,*
+*,int<!!>,AllDefaultPair,CheckedInts,CheckedJson,int[1],short,short,int<>,int[][],NameEcho
+,1,"8,y","1,2","{""n"":2}",7,-32768,32767,4,"1,2;",1
+,2,,3,{},8,-1,1,5,9;,2

@@ -1,0 +1,5 @@
+#,generated fixture,
+,id,value
+$,*,*
+*,int<!!>,RejectEven
+,1,2

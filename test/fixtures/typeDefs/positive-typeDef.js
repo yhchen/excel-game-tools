@@ -70,6 +70,24 @@ function initialize(Sheets, typeDefs) {
 		value: requiredString
 	});
 	typeDefs.Vector2Fixed = def.TArray(float, 2);
+	typeDefs.AllDefaultPair = def.TObject({
+		a: int.DVAL(3),
+		b: string.DVAL('z')
+	});
+	typeDefs.CheckedInts = def.TArray(int, undefined, (data) => {
+		if (data.indexOf(0) >= 0) throw new Error('array has zero');
+	});
+	typeDefs.CheckedJson = def.TJson({
+		n: int
+	}, (data) => {
+		if (data.n < 0) throw new Error('json n is negative');
+	});
+	typeDefs.NameEcho = def.TCustom(int, () => {
+		if (def.GetSheetName() !== 'Edges' || def.GetColumnName() !== 'named') {
+			throw new Error('name mismatch');
+		}
+		return true;
+	});
 }
 
 function onExportAllDone() {}

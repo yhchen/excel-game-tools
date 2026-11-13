@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.onExportAllDone = exports.initialize = void 0;
 require = global.require;
 const def_1 = require("def");
+const Internal = def_1.Internal;
 global.__require_tmp_file_path__ = __dirname;
 function initialize(Sheets, typeDefs) {
     // internal type
@@ -113,6 +114,59 @@ function initialize(Sheets, typeDefs) {
         if (checkData + 100 != data)
             throw new Error(`value: ${data} is not equal to column 'checkCell' data: ${checkData}`);
         return true;
+    });
+    const acceptNonNegative = (data) => {
+        if (data < 0)
+            throw new Error('custom value must be >= 0');
+        return true;
+    };
+    typeDefs.CustomWrapDval = def_1.def.TCustom(int.DVAL(5), acceptNonNegative);
+    typeDefs.CustomThenDval = def_1.def.TCustom(int, acceptNonNegative).DVAL(5);
+    typeDefs.TranslatedInt = def_1.def.TTranslate(int, (data) => data * 10);
+    typeDefs.EItemFlags = def_1.def.TEnum({
+        None: 0,
+        Read: 1,
+        Write: 2,
+        ReadWrite: 3,
+    }, undefined, true);
+    typeDefs.PointStruct = def_1.def.TStruct({
+        x: int,
+        y: int.DVAL(7),
+    });
+    typeDefs.ThenTail = def_1.def.TObject({
+        v1: int,
+        v2: typeDefs.CustomThenDval,
+    });
+    const refTargetId = Internal.TryColumnTypeTranslate(Sheets.RefTarget.id);
+    refTargetId.__inner__name__abcxyz__ = 'int';
+    typeDefs.CustomRefId = def_1.def.TCustom(refTargetId, (data) => {
+        if (data <= 0)
+            throw new Error('custom ref id must be positive');
+        return true;
+    });
+    typeDefs.FlagsDefaultWrite = typeDefs.EItemFlags.DVAL(2);
+    typeDefs.CustomFlag = def_1.def.TCustom(typeDefs.EItemFlags, (data) => {
+        if (data === 0)
+            throw new Error('custom flag rejected zero');
+        return true;
+    });
+    typeDefs.TranslatedText = def_1.def.TTranslate(string, (data) => data.toUpperCase());
+    typeDefs.ComboJson = def_1.def.TJson({
+        key: int.DVAL(1),
+        value: string.DVAL('x'),
+        kind: typeDefs.EItemFlags,
+    });
+    typeDefs.OddList = def_1.def.TArray(def_1.def.TCustom(int, (data) => {
+        if (data % 2 === 0)
+            throw new Error('custom rejected even');
+        return true;
+    }));
+    typeDefs.CheckedPair = def_1.def.TObject({
+        a: int,
+        b: int,
+    }, (data) => {
+        if (data.a + data.b > 10)
+            throw new Error('pair sum too large');
     });
 }
 exports.initialize = initialize;

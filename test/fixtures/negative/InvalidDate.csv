@@ -1,0 +1,5 @@
+#,generated fixture,
+,id,value
+$,*,*
+*,int<!!>,date
+,1,not-a-date

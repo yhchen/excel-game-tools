@@ -1,0 +1,5 @@
+#,bad header,
+,id,bad-name
+$,*,*
+*,int<!!>,int
+,1,1

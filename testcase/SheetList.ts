@@ -6,5 +6,5 @@ declare const global: any; declare const require: Function; (<any>require) = glo
 
 // ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
 // add sheet name here
-export type SheetList = 'Item' | 'Equip';
+export type SheetList = 'Item' | 'Equip' | 'RefTarget';
 // ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑

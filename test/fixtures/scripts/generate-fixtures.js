@@ -157,6 +157,24 @@ function initialize(Sheets, typeDefs) {
 		value: requiredString
 	});
 	typeDefs.Vector2Fixed = def.TArray(float, 2);
+	typeDefs.AllDefaultPair = def.TObject({
+		a: int.DVAL(3),
+		b: string.DVAL('z')
+	});
+	typeDefs.CheckedInts = def.TArray(int, undefined, (data) => {
+		if (data.indexOf(0) >= 0) throw new Error('array has zero');
+	});
+	typeDefs.CheckedJson = def.TJson({
+		n: int
+	}, (data) => {
+		if (data.n < 0) throw new Error('json n is negative');
+	});
+	typeDefs.NameEcho = def.TCustom(int, () => {
+		if (def.GetSheetName() !== 'Edges' || def.GetColumnName() !== 'named') {
+			throw new Error('name mismatch');
+		}
+		return true;
+	});
 }
 
 function onExportAllDone() {}
@@ -175,6 +193,90 @@ function initialize(Sheets, typeDefs) {
 		itemId: Sheets.RefSource.id,
 		count: typeDefs.int.DVAL(1)
 	});
+}
+
+function onExportAllDone() {}
+
+exports.initialize = initialize;
+exports.onExportAllDone = onExportAllDone;
+`);
+
+	writeFile(path.join(typeDefDir, 'coverage-typeDef.js'), `"use strict";
+require = global.require;
+const { def } = require("def");
+global.__require_tmp_file_path__ = __dirname;
+
+function initialize(Sheets, typeDefs) {
+	const int = typeDefs.int;
+	const acceptNonNegative = (data) => {
+		if (data < 0) throw new Error('custom value must be >= 0');
+		return true;
+	};
+	typeDefs.RejectEven = def.TCustom(int, (data) => {
+		if (data % 2 === 0) throw new Error('custom rejected even');
+		return true;
+	});
+	typeDefs.CustomWrapDval = def.TCustom(int.DVAL(5), acceptNonNegative);
+	typeDefs.WrapPair = def.TObject({
+		v1: int,
+		v2: typeDefs.CustomWrapDval
+	});
+	typeDefs.TinyEnum = def.TEnum({
+		None: 0,
+		Read: 1
+	});
+	typeDefs.CustomFlag = def.TCustom(typeDefs.TinyEnum, (data) => {
+		if (data === 0) throw new Error('custom flag rejected zero');
+		return true;
+	});
+	typeDefs.OddList = def.TArray(typeDefs.RejectEven);
+	typeDefs.PairSum = def.TObject({
+		a: int,
+		b: int
+	}, (data) => {
+		if (data.a + data.b > 10) throw new Error('pair sum too large');
+	});
+	typeDefs.LookupMissing = def.TCustom(int, () => {
+		def.getRowDataByColumnName('missingCol');
+		return true;
+	});
+}
+
+function onExportAllDone() {}
+
+exports.initialize = initialize;
+exports.onExportAllDone = onExportAllDone;
+`);
+
+	writeInitTypeDef('init-dval-object-typeDef.js', '	def.TObject({ a: typeDefs.int }).DVAL(1);');
+	writeInitTypeDef('init-enum-no-zero-typeDef.js', '	def.TEnum({ Only: 1 });');
+	writeInitTypeDef('init-dval-null-typeDef.js', '	typeDefs.int.DVAL(undefined);');
+	writeInitTypeDef('init-dval-type-typeDef.js', "	typeDefs.int.DVAL('x');");
+	writeInitTypeDef('init-array-bad-typeDef.js', '	def.TArray({});');
+	writeInitTypeDef('init-object-array-typeDef.js', '	def.TObject({ a: def.TArray(typeDefs.int) });');
+	writeInitTypeDef('init-vector-count-typeDef.js', "	def.TArray(typeDefs.int, 'nope');");
+	writeInitTypeDef('init-json-bad-typeDef.js', '	def.TJson({ a: {} });');
+	writeFile(path.join(typeDefDir, 'init-require-missing-typeDef.js'), `"use strict";
+require = global.require;
+const { def } = require("def");
+global.__require_tmp_file_path__ = __dirname;
+require("./does-not-exist.js");
+
+function initialize() {}
+function onExportAllDone() {}
+exports.initialize = initialize;
+exports.onExportAllDone = onExportAllDone;
+`);
+}
+
+function writeInitTypeDef(fileName, body) {
+	writeFile(path.join(typeDefDir, fileName), `"use strict";
+require = global.require;
+const { def } = require("def");
+global.__require_tmp_file_path__ = __dirname;
+
+function initialize(Sheets, typeDefs) {
+${body}
 }
 
 function onExportAllDone() {}
@@ -276,6 +378,20 @@ function writePositiveCsvFixtures() {
 			['2', '200', '200,5']
 		]
 	)));
+
+	const edgeHeaders = ['id', 'allDefault', 'checkedInts', 'checkedJson', 'one', 'shortMin', 'shortMax', 'plain', 'matrixTail', 'named'];
+	writeFile(path.join(positiveDir, 'Edges.csv'), csv([
+		['#', 'defaults checkers bounds go and names'].concat(new Array(edgeHeaders.length - 1).fill('')),
+		[''].concat(edgeHeaders),
+		['//', 'skipped group comment'].concat(new Array(edgeHeaders.length - 1).fill('')),
+		['$'].concat(edgeHeaders.map(() => '*')),
+		['*'].concat([
+			'int<!!>', 'AllDefaultPair', 'CheckedInts', 'CheckedJson', 'int[1]',
+			'short', 'short', 'int<>', 'int[][]', 'NameEcho'
+		]),
+		[''].concat([1, '8,y', '1,2', '{"n":2}', 7, -32768, 32767, 4, '1,2;', 1]),
+		[''].concat([2, '', '3', '{}', 8, -1, 1, 5, '9;', 2])
+	]));
 }
 
 function writeNegativeCsvFixtures() {
@@ -305,11 +421,104 @@ function writeNegativeCsvFixtures() {
 		'InvalidReference.csv': tableRows(['id', 'sourceId'], ['*', '*'], ['int<!!>', 'RefSource.id'], [['1', '999']]),
 		'RequiredPairTrailingEmpty.csv': tableRows(['id', 'pair'], ['*', '*'], ['int<!!>', 'RequiredPair'], [['1', '1,']]),
 		'DvalWhitespaceNotDefault.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'IntTailDefault'], [['1', '1, ']]),
-		'ItemDataBlank.csv': tableRows(['id', 'cost'], ['*', '*'], ['int<!!>', 'ItemData[]<!N>'], [['1', '']])
+		'ItemDataBlank.csv': tableRows(['id', 'cost'], ['*', '*'], ['int<!!>', 'ItemData[]<!N>'], [['1', '']]),
+		'CharOutOfRange.csv': tableRows(['id', 'wide'], ['*', '*'], ['int<!!>', 'char'], [['1', '129']]),
+		'BadSheetRef.csv': tableRows(['id', 'refId'], ['*', '*'], ['int<!!>', 'A.B.C'], [['1', '1']]),
+		'UnknownSheet.csv': tableRows(['id', 'refId'], ['*', '*'], ['int<!!>', 'MissingSheet.id'], [['1', '1']]),
+		'CustomCheckFail.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'RejectEven'], [['1', '2']]),
+		'CustomWrapRequiredEmpty.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'CustomWrapDval<!N>'], [['1', '']]),
+		'CustomWrapTrailingEmpty.csv': tableRows(['id', 'pair'], ['*', '*'], ['int<!!>', 'WrapPair'], [['1', '1,']]),
+		'UnknownType.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'NoSuchType'], [['1', '1']]),
+		'BadArrayBracket.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'int['], [['1', '1']]),
+		'BadArrayCount.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'int[x]'], [['1', '1']]),
+		'BadTail.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'int<!Q>'], [['1', '1']]),
+		'UnclosedTail.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'int<!!'], [['1', '1']]),
+		'LeadingBracket.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', '[int]'], [['1', '1']]),
+		'FixedArrayTooShort.csv': tableRows(['id', 'pair'], ['*', '*'], ['int<!!>', 'int[2]'], [['1', '1']]),
+		'UniqueEmptyDuplicate.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'int<!!>'], [['1', ''], ['2', '']]),
+		'UcharOutOfRange.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'uchar'], [['1', '256']]),
+		'UshortOutOfRange.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'ushort'], [['1', '32769']]),
+		'UintNegative.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'uint'], [['1', '-1']]),
+		'Uint64Negative.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'uint64'], [['1', '-1']]),
+		'Int64NotNumber.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'int64'], [['1', 'abc']]),
+		'InvalidDate.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'date'], [['1', 'not-a-date']]),
+		'EnumArrayBad.csv': tableRows(['id', 'kinds'], ['*', '*'], ['int<!!>', 'TestEnum[]'], [['1', '1,999']]),
+		'CustomEnumZero.csv': tableRows(['id', 'kind'], ['*', '*'], ['int<!!>', 'CustomFlag'], [['1', '0']]),
+		'CustomListEven.csv': tableRows(['id', 'values'], ['*', '*'], ['int<!!>', 'OddList'], [['1', '1,2']]),
+		'CustomPairSum.csv': tableRows(['id', 'pair'], ['*', '*'], ['int<!!>', 'PairSum'], [['1', '6,6']]),
+		'CustomLookupMissing.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'LookupMissing'], [['1', '1']]),
+		'CustomSource.csv': tableRows(['id', 'code'], ['*', '*'], ['int<!!>', 'RejectEven'], [['1', '1']]),
+		'RefCustomColumn.csv': tableRows(['id', 'refCode'], ['*', '*'], ['int<!!>', 'CustomSource.code'], [['1', '1']]),
+		'InitDvalObject.csv': tableRows(['id'], ['*'], ['int'], [['1']]),
+		'InitEnumNoZero.csv': tableRows(['id'], ['*'], ['int'], [['1']]),
+		'UnclosedArray.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'int[2'], [['1', '1']]),
+		'ArrayCountTail.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'int[2x]'], [['1', '1']]),
+		'ArrayTailJunk.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'int[]x'], [['1', '1']]),
+		'TailNoOpen.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'int>'], [['1', '1']]),
+		'VectorCountZero.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'int[0]'], [['1', '1']]),
+		'FourDimArray.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'int[][][][]'], [['1', '1']]),
+		'UniqueArrayEmpty.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'int[]<!!>'], [['1', '']]),
+		'JsonNotObject.csv': tableRows(['id', 'jsonData'], ['*', '*'], ['int<!!>', 'JsonWithDefaults'], [['1', '1']]),
+		'ShortOutOfRange.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'short'], [['1', '32768']]),
+		'FloatNotNumber.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'float'], [['1', 'abc']]),
+		'DoubleNotNumber.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'double'], [['1', 'abc']]),
+		'ArrayHasZero.csv': tableRows(['id', 'values'], ['*', '*'], ['int<!!>', 'CheckedInts'], [['1', '1,0']]),
+		'JsonNegative.csv': tableRows(['id', 'jsonData'], ['*', '*'], ['int<!!>', 'CheckedJson'], [['1', '{"n":-1}']]),
+		'HeaderBad.csv': [
+			['#', 'bad header', ''],
+			['', 'id', 'bad-name'],
+			['$', '*', '*'],
+			['*', 'int<!!>', 'int'],
+			['', '1', '1']
+		],
+		'TypeRowMissing.csv': [
+			['#', 'type marker is not star', ''],
+			['', 'id', 'value'],
+			['$', '*', '*'],
+			['x', 'int<!!>', 'int'],
+			['', '1', '1']
+		],
+		'InitDvalNull.csv': tableRows(['id'], ['*'], ['int'], [['1']]),
+		'InitDvalType.csv': tableRows(['id'], ['*'], ['int'], [['1']]),
+		'InitArrayBad.csv': tableRows(['id'], ['*'], ['int'], [['1']]),
+		'InitObjectArray.csv': tableRows(['id'], ['*'], ['int'], [['1']]),
+		'InitVectorCount.csv': tableRows(['id'], ['*'], ['int'], [['1']]),
+		'InitJsonBad.csv': tableRows(['id'], ['*'], ['int'], [['1']]),
+		'InitRequireMissing.csv': tableRows(['id'], ['*'], ['int'], [['1']])
 	};
 	for (const [fileName, rows] of Object.entries(cases)) {
 		writeFile(path.join(negativeDir, fileName), csv(rows));
 	}
+
+	const dateNumber = xlsx.utils.book_new();
+	addSheet(dateNumber, 'DateNumber', [
+		['#', 'numeric cell is not a date string'],
+		['', 'id', 'value'],
+		['$', '*', '*'],
+		['*', 'int<!!>', 'date'],
+		['', 1, 123]
+	]);
+	xlsx.writeFile(dateNumber, path.join(negativeDir, 'DateNumber.xlsx'));
+
+	const dupSource = xlsx.utils.book_new();
+	addSheet(dupSource, 'DupSheet', [
+		['#', 'first copy of DupSheet'],
+		['', 'id', 'name'],
+		['$', '*', '*'],
+		['*', 'int<!!>', 'string'],
+		['', 1, 'left']
+	]);
+	xlsx.writeFile(dupSource, path.join(negativeDir, 'DupSource.xlsx'));
+
+	const dupHeader = xlsx.utils.book_new();
+	addSheet(dupHeader, 'DupSheet', [
+		['#', 'same sheet name with a shorter header'],
+		['', 'id'],
+		['$', '*'],
+		['*', 'int<!!>'],
+		['', 2]
+	]);
+	xlsx.writeFile(dupHeader, path.join(negativeDir, 'DupHeader.xlsx'));
 }
 
 function addSheet(workbook, sheetName, rows, merges) {
@@ -368,6 +577,49 @@ function writeXlsxFixtures() {
 	xlsx.writeFile(comments, path.join(positiveDir, 'XlsxCommentsAndIgnore.xlsx'));
 }
 
+function writeTypeMatrixWorkbook() {
+	const book = xlsx.utils.book_new();
+	addSheet(book, 'RefTarget', [
+		['#', 'ids referenced by TypeMatrix'],
+		['', 'id'],
+		['$', '*'],
+		['*', 'int<!!>'],
+		['', 1],
+		['', 2]
+	]);
+	const headers = [
+		'id', 'ucharValue', 'ushortValue', 'uintValue', 'int64Value', 'uint64Value',
+		'translated', 'flags', 'enumList', 'structPos', 'wrapDval', 'thenDval',
+		'thenRequired', 'thenTail', 'refId', 'refList', 'customRef'
+	];
+	addSheet(book, 'TypeMatrix', [
+		['#', 'type coverage'].concat(new Array(headers.length - 1).fill('')),
+		[''].concat(headers),
+		['$'].concat(headers.map(() => '*')),
+		['*'].concat([
+			'int<!!>', 'uchar', 'ushort', 'uint', 'int64', 'uint64',
+			'TranslatedInt', 'EItemFlags', 'EItemFlags[]', 'PointStruct',
+			'CustomWrapDval', 'CustomThenDval', 'CustomThenDval<!N>', 'ThenTail',
+			'RefTarget.id', 'RefTarget.id[]', 'CustomRefId'
+		]),
+		[''].concat([1, 255, 32768, 4294967295, 3000000000, 42, 3, 3, '1,2', '10,20', 6, 6, 6, '8,4', 1, '1,2', 1]),
+		[''].concat([2, '', '', '', '', '', '', 'Read', '2', '4,', '', '', '', '9,', 2, '2', 2])
+	]);
+	const comboHeaders = ['id', 'enumDefault', 'customEnum', 'translatedText', 'jsonCombo', 'customList', 'checkedPair', 'selfId'];
+	addSheet(book, 'Combo', [
+		['#', 'enum json translate custom array and same-sheet reference'].concat(new Array(comboHeaders.length - 1).fill('')),
+		[''].concat(comboHeaders),
+		['$'].concat(comboHeaders.map(() => '*')),
+		['*'].concat([
+			'int<!!>', 'FlagsDefaultWrite', 'CustomFlag', 'TranslatedText', 'ComboJson',
+			'OddList', 'CheckedPair', 'Combo.id'
+		]),
+		[''].concat([1, 1, 1, 'ab', '{"value":"ok","kind":1}', '1,3', '2,3', 1]),
+		[''].concat([2, '', '', '', '{}', '5', '1,1', 2])
+	]);
+	xlsx.writeFile(book, path.join(rootDir, 'testcase', 'TypeMatrix.xlsx'));
+}
+
 function writeConfigs() {
 	const positiveCases = [
 		['positive-basic-types', './test/fixtures/positive/BasicTypes.csv', 'positive-typeDef.js'],
@@ -393,15 +645,85 @@ function writeConfigs() {
 		'./test/fixtures/positive/RefUsers.csv'
 	], 'reference-typeDef.js');
 
-	const negativeFiles = fs.readdirSync(negativeDir).filter(name => name.endsWith('.csv'));
+	const edgeCase = 'positive-scalar-edges';
+	writeJson(path.join(configDir, `${edgeCase}.json`), config(
+		edgeCase,
+		'./test/fixtures/positive/Edges.csv',
+		'positive-typeDef.js',
+		['*'],
+		{
+			Export: [
+				{
+					type: 'json',
+					OutputDir: `${tmpDir}/${edgeCase}/`,
+					GroupFilter: ['*'],
+					UseDefaultValueIfEmpty: true
+				},
+				{
+					type: 'go',
+					OutputDir: `${tmpDir}/${edgeCase}/`,
+					GroupFilter: ['*'],
+					UseDefaultValueIfEmpty: false
+				}
+			]
+		}
+	));
+
+	writeJson(path.join(configDir, 'negative-missing-file.json'), config(
+		'negative-missing-file',
+		'./test/fixtures/positive/NoSuchFile.csv'
+	));
+	writeJson(path.join(configDir, 'negative-bad-export.json'), config(
+		'negative-bad-export',
+		'./test/fixtures/positive/BasicTypes.csv',
+		'positive-typeDef.js',
+		['*'],
+		{
+			Export: [{
+				type: 'nope',
+				OutputDir: `${tmpDir}/negative-bad-export/`,
+				GroupFilter: ['*'],
+				UseDefaultValueIfEmpty: true
+			}]
+		}
+	));
+
+	const negativeFiles = fs.readdirSync(negativeDir).filter(isNegativeCaseFile);
 	for (const fileName of negativeFiles) {
-		const caseName = `negative-${path.basename(fileName, '.csv').replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()}`;
-		const typeDefName = fileName === 'InvalidReference.csv' ? 'reference-typeDef.js' : 'positive-typeDef.js';
-		const includePath = fileName === 'InvalidReference.csv'
-			? ['./test/fixtures/positive/RefSource.csv', `./test/fixtures/negative/${fileName}`]
-			: `./test/fixtures/negative/${fileName}`;
+		const baseName = fileName.replace(/\.(csv|xlsx)$/i, '');
+		const caseName = `negative-${baseName.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()}`;
+		const typeDefName = negativeTypeDefName(fileName);
+		const includePath = negativeIncludePath(fileName);
 		writeCaseConfig(caseName, includePath, typeDefName);
 	}
+}
+
+function isNegativeCaseFile(name) {
+	if (name === 'CustomSource.csv' || name === 'DupSource.xlsx') return false;
+	return name.endsWith('.csv') || name.endsWith('.xlsx');
+}
+
+function negativeTypeDefName(fileName) {
+	if (fileName === 'InvalidReference.csv') return 'reference-typeDef.js';
+	if (fileName.startsWith('Init')) {
+		const kebab = fileName.replace(/\.(csv|xlsx)$/, '').replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+		return `${kebab}-typeDef.js`;
+	}
+	if (fileName.startsWith('Custom') || fileName === 'RefCustomColumn.csv') return 'coverage-typeDef.js';
+	return 'positive-typeDef.js';
+}
+
+function negativeIncludePath(fileName) {
+	if (fileName === 'InvalidReference.csv') {
+		return ['./test/fixtures/positive/RefSource.csv', `./test/fixtures/negative/${fileName}`];
+	}
+	if (fileName === 'RefCustomColumn.csv') {
+		return ['./test/fixtures/negative/CustomSource.csv', `./test/fixtures/negative/${fileName}`];
+	}
+	if (fileName === 'DupHeader.xlsx') {
+		return ['./test/fixtures/negative/DupSource.xlsx', `./test/fixtures/negative/${fileName}`];
+	}
+	return `./test/fixtures/negative/${fileName}`;
 }
 
 for (const dir of [positiveDir, negativeDir, configDir, typeDefDir]) {
@@ -412,6 +734,7 @@ writeTypeDefs();
 writePositiveCsvFixtures();
 writeNegativeCsvFixtures();
 writeXlsxFixtures();
+writeTypeMatrixWorkbook();
 writeConfigs();
 
 console.log('[generate-fixtures] Fixtures generated.');

@@ -1,7 +1,18 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { fixturePath } = require('../helpers/paths');
+const fs = require('node:fs');
+const path = require('node:path');
+const { spawnSync } = require('node:child_process');
+const { fixturePath, rootDir, tmpPath } = require('../helpers/paths');
 const { cleanCase, runCli, assertSuccess, assertFailure, readJson, jsonOutput } = require('../helpers/cli');
+
+function runArgs(args) {
+	return spawnSync(process.execPath, ['dist/index.js'].concat(args), {
+		cwd: rootDir,
+		encoding: 'utf8',
+		shell: false,
+	});
+}
 
 function config(name) {
 	return fixturePath('configs', `${name}.json`);
@@ -151,6 +162,40 @@ test('trailing empty object fields use DVAL and holes stay parsed', () => {
 	assert.deepEqual(data['4'].value, { v1: 1, v2: ' ', v3: 0 });
 });
 
+test('positive scalar edges export defaults, checkers, bounds, and go files', () => {
+	const caseName = 'positive-scalar-edges';
+	cleanCase(caseName);
+	const result = runCli(config(caseName), typeDef('positive-typeDef.js'));
+	assertSuccess(result);
+	const data = readJson(jsonOutput(caseName, 'Edges'));
+	assert.deepEqual(data['1'].allDefault, { a: 8, b: 'y' });
+	assert.deepEqual(data['2'].allDefault, { a: 3, b: 'z' });
+	assert.deepEqual(data['1'].checkedInts, [1, 2]);
+	assert.deepEqual(data['2'].checkedInts, [3]);
+	assert.deepEqual(data['1'].checkedJson, { n: 2 });
+	assert.deepEqual(data['2'].checkedJson, { n: 0 });
+	assert.deepEqual(data['1'].one, [7]);
+	assert.deepEqual(data['2'].one, [8]);
+	assert.equal(data['1'].shortMin, -32768);
+	assert.equal(data['1'].shortMax, 32767);
+	assert.equal(data['1'].plain, 4);
+	assert.deepEqual(data['1'].matrixTail, [[1, 2]]);
+	assert.deepEqual(data['2'].matrixTail, [[9]]);
+	assert.equal(data['1'].named, 1);
+	assert.equal(data['2'].named, 2);
+	const goDir = tmpPath(caseName);
+	assert.match(fs.readFileSync(path.join(goDir, 'initialize.go'), 'utf8'), /Edges = newEdges\(\)/);
+	assert.match(fs.readFileSync(path.join(goDir, 'Edges.go'), 'utf8'), /type edges struct/);
+	assert.match(fs.readFileSync(path.join(goDir, 'loadConfig.go'), 'utf8'), /_Edges := newEdges\(\)/);
+});
+
+test('debug output flag runs a successful export', () => {
+	const caseName = 'positive-scalar-edges';
+	cleanCase(caseName);
+	const result = runArgs(['--debug-output', '1', '-c', config(caseName), '-t', typeDef('positive-typeDef.js')]);
+	assertSuccess(result);
+});
+
 test('positive xlsx comments fixture skips ignored sheets and comments', () => {
 	const caseName = 'positive-xlsx-comments-ignore';
 	cleanCase(caseName);
@@ -182,14 +227,104 @@ const negativeCases = [
 	['negative-dval-whitespace-not-default', /not a number/i],
 	['negative-item-data-blank', /value can not be empty/i],
 	['negative-unique-default-duplicate', /duplicate|unique/i],
-	['negative-unique-duplicate', /duplicate|unique/i]
+	['negative-unique-duplicate', /duplicate|unique/i],
+	['negative-char-out-of-range', /between \[-127, 128\]/],
+	['negative-bad-sheet-ref', /Sheet Index Type Format Error/],
+	['negative-unknown-sheet', /not found/],
+	['negative-custom-check-fail', /custom rejected even/],
+	['negative-custom-wrap-required-empty', /can not be empty/],
+	['negative-custom-wrap-trailing-empty', /not a number/],
+	['negative-unknown-type', /not found/],
+	['negative-bad-array-bracket', /not found/],
+	['negative-bad-array-count', /format error/],
+	['negative-bad-tail', /invalid tail checker/],
+	['negative-unclosed-tail', /No '>' symbol/],
+	['negative-leading-bracket', /incorrect type/],
+	['negative-fixed-array-too-short', /array length incorrect/],
+	['negative-unique-empty-duplicate', /duplicate|unique/],
+	['negative-uchar-out-of-range', /\[0, 255\]/],
+	['negative-ushort-out-of-range', /\[0, 32768\]/],
+	['negative-uint-negative', /\[0, 4294967295\]/],
+	['negative-uint64-negative', /is not a number/],
+	['negative-int64-not-number', /is not a number/],
+	['negative-invalid-date', /Date Type/],
+	['negative-enum-array-bad', /enum type incorrect/],
+	['negative-custom-enum-zero', /custom flag rejected zero/],
+	['negative-custom-list-even', /custom rejected even/],
+	['negative-custom-pair-sum', /pair sum too large/],
+	['negative-custom-lookup-missing', /missingCol not found/],
+	['negative-ref-custom-column', /must be a base type/],
+	['negative-init-dval-object', /Only <enum> and <base>/],
+	['negative-init-enum-no-zero', /default value of 0/],
+	['negative-unclosed-array', /']' not found/],
+	['negative-array-count-tail', /']' not found/],
+	['negative-array-tail-junk', /type should be follow/],
+	['negative-tail-no-open', /No '<' symbol/],
+	['negative-vector-count-zero', /greater than 1/],
+	['negative-four-dim-array', /more dimensions/],
+	['negative-unique-array-empty', /unique value can not be empty/],
+	['negative-json-not-object', /type is not a object/],
+	['negative-short-out-of-range', /\[-32768, 32767\]/],
+	['negative-float-not-number', /is not a number/],
+	['negative-double-not-number', /is not a number/],
+	['negative-array-has-zero', /array has zero/],
+	['negative-json-negative', /json n is negative/],
+	['negative-header-bad', /Header Name/],
+	['negative-type-row-missing', /Type Row not found/],
+	['negative-date-number', /TypeParseer/],
+	['negative-dup-header', /different header/],
+	['negative-init-dval-null', /can not be null or undefined/],
+	['negative-init-dval-type', /default value type incorrect/],
+	['negative-init-array-bad', /Array Only support/],
+	['negative-init-object-array', /Object Only support/],
+	['negative-init-vector-count', /not a int value/],
+	['negative-init-json-bad', /TJson subtype invalid/],
+	['negative-init-require-missing', /could not found js file/]
 ];
+
+function negativeTypeDef(caseName) {
+	if (caseName === 'negative-invalid-reference') return 'reference-typeDef.js';
+	if (caseName.startsWith('negative-init-')) return `${caseName.slice('negative-'.length)}-typeDef.js`;
+	if (caseName.startsWith('negative-custom-') || caseName === 'negative-ref-custom-column') return 'coverage-typeDef.js';
+	return 'positive-typeDef.js';
+}
 
 for (const [caseName, expectedError] of negativeCases) {
 	test(`${caseName} fails with stable validation output`, () => {
 		cleanCase(caseName);
-		const typeDefName = caseName === 'negative-invalid-reference' ? 'reference-typeDef.js' : 'positive-typeDef.js';
+		const typeDefName = negativeTypeDef(caseName);
 		const result = runCli(config(caseName), typeDef(typeDefName));
 		assertFailure(result, expectedError);
 	});
 }
+
+test('missing config argument prints help', () => {
+	assertFailure(runArgs([]), /parameter is missing/);
+});
+
+test('help flag prints the option list', () => {
+	const result = runArgs(['-h']);
+	assert.match(`${result.stdout}\n${result.stderr}`, /-c : config file path/);
+});
+
+test('config flag without a path prints help', () => {
+	assertFailure(runArgs(['-c']), /no config file path/);
+});
+
+test('debug output rejects a value other than 0 or 1', () => {
+	assertFailure(runArgs(['--debug-output', '2', '-c', config('positive-basic-types'), '-t', typeDef('positive-typeDef.js')]), /must be \[1\] or \[0\]/);
+});
+
+test('debug output requires a value', () => {
+	assertFailure(runArgs(['--debug-output']), /must set a value/);
+});
+
+test('missing include file fails', () => {
+	cleanCase('negative-missing-file');
+	assertFailure(runCli(config('negative-missing-file'), typeDef('positive-typeDef.js')), /not found/);
+});
+
+test('unknown export type fails while loading exporters', () => {
+	cleanCase('negative-bad-export');
+	assertFailure(runCli(config('negative-bad-export'), typeDef('positive-typeDef.js')), /Export constructor not found/);
+});

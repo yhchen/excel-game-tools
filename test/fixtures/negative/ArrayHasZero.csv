@@ -1,0 +1,5 @@
+#,generated fixture,
+,id,values
+$,*,*
+*,int<!!>,CheckedInts
+,1,"1,0"

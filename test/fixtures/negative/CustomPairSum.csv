@@ -1,0 +1,5 @@
+#,generated fixture,
+,id,pair
+$,*,*
+*,int<!!>,PairSum
+,1,"6,6"

@@ -1,0 +1,5 @@
+#,generated fixture,
+,id,jsonData
+$,*,*
+*,int<!!>,CheckedJson
+,1,"{""n"":-1}"

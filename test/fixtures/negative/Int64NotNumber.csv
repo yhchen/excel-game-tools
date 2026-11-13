@@ -1,0 +1,5 @@
+#,generated fixture,
+,id,value
+$,*,*
+*,int<!!>,int64
+,1,abc
