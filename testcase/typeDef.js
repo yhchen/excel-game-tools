@@ -168,6 +168,29 @@ function initialize(Sheets, typeDefs) {
         if (data.a + data.b > 10)
             throw new Error('pair sum too large');
     });
+    typeDefs.WrapTranslate = def_1.def.TTranslate(int.DVAL(5), (data) => data * 10);
+    typeDefs.ThenTranslate = def_1.def.TTranslate(int, (data) => data * 10).DVAL(5);
+    typeDefs.CustomOfTranslate = def_1.def.TCustom(def_1.def.TTranslate(int, (data) => data * 10), (data) => {
+        if (data < 20)
+            throw new Error('translated below 20');
+    });
+    typeDefs.TranslateOfCustom = def_1.def.TTranslate(def_1.def.TCustom(int, (data) => {
+        if (data < 0)
+            throw new Error('raw below zero');
+    }), (data) => data * 10);
+    typeDefs.AllDefaultPair = def_1.def.TObject({
+        a: int.DVAL(3),
+        b: string.DVAL('z'),
+    });
+    typeDefs.JsonMix = def_1.def.TJson({
+        nums: def_1.def.TArray(int),
+        tag: def_1.def.TCustom(int.DVAL(5), (data) => {
+            if (data < 0)
+                throw new Error('json tag is negative');
+        }),
+    });
+    typeDefs.ParityUnique = def_1.def.TTranslate(int, (data) => data % 2);
+    typeDefs.DoubledNonZero = def_1.def.TTranslate(int, (data) => data * 10);
 }
 exports.initialize = initialize;
 ;

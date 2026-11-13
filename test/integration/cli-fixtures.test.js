@@ -279,7 +279,16 @@ const negativeCases = [
 	['negative-init-object-array', /Object Only support/],
 	['negative-init-vector-count', /not a int value/],
 	['negative-init-json-bad', /TJson subtype invalid/],
-	['negative-init-require-missing', /could not found js file/]
+	['negative-init-require-missing', /could not found js file/],
+	['negative-custom-wrap-translate-empty', /value can not be empty/],
+	['negative-custom-translate-below', /translated below 20/],
+	['negative-custom-raw-below', /raw below zero/],
+	['negative-custom-partial-required', /value can not be empty/],
+	['negative-custom-json-tag', /json tag is negative/],
+	['negative-custom-parity-dup', /duplicate value: 1/],
+	['negative-custom-translated-zero', /value can not be Zero/],
+	['negative-merge-type-mismatch', /different header \[id\]/],
+	['negative-merge-unique-dup', /duplicate value: 1/]
 ];
 
 function negativeTypeDef(caseName) {

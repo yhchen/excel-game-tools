@@ -159,6 +159,55 @@ function expectTypeMatrix() {
 	expectEqual(combo['2'].customList, [5], 'Combo 2.customList');
 	expectEqual(combo['2'].checkedPair, { a: 1, b: 1 }, 'Combo 2.checkedPair');
 	expectEqual(combo['2'].selfId, 2, 'Combo 2.selfId');
+	expectMix(globalJson);
+}
+
+function expectMix(globalJson) {
+	const mix = globalJson.Mix;
+	if (!mix || !mix['1'] || !mix['2']) {
+		fail('global.json is missing Mix rows 1 and 2');
+	}
+	const row1 = mix['1'];
+	const row2 = mix['2'];
+	expectEqual(mix._ids, [1, 2], 'Mix._ids');
+	expectEqual(row1.wrapTranslate, 30, 'Mix 1.wrapTranslate');
+	expectEqual(row1.thenTranslate, 30, 'Mix 1.thenTranslate');
+	expectEqual(row1.thenTranslateRequired, 40, 'Mix 1.thenTranslateRequired');
+	expectEqual(row1.customOfTranslate, 30, 'Mix 1.customOfTranslate');
+	expectEqual(row1.translateOfCustom, 30, 'Mix 1.translateOfCustom');
+	expectEqual(row1.allRequired, { a: 8, b: 'y' }, 'Mix 1.allRequired');
+	expectEqual(row1.jsonMix, { nums: [1, 2], tag: 5 }, 'Mix 1.jsonMix');
+	expectEqual(row1.parity, 1, 'Mix 1.parity');
+	expectEqual(row1.doubled, 30, 'Mix 1.doubled');
+	expectEqual(row2.wrapTranslate, 5, 'Mix 2.wrapTranslate');
+	expectEqual(row2.thenTranslate, 5, 'Mix 2.thenTranslate');
+	expectEqual(row2.thenTranslateRequired, 5, 'Mix 2.thenTranslateRequired');
+	expectEqual(row2.customOfTranslate, 20, 'Mix 2.customOfTranslate');
+	expectEqual(row2.translateOfCustom, 0, 'Mix 2.translateOfCustom');
+	expectEqual(row2.allRequired, { a: 3, b: 'z' }, 'Mix 2.allRequired');
+	expectEqual(row2.jsonMix, { tag: 5 }, 'Mix 2.jsonMix');
+	expectEqual(Object.prototype.hasOwnProperty.call(row2.jsonMix, 'nums'), false, 'Mix 2.jsonMix.nums');
+	expectEqual(row2.parity, 0, 'Mix 2.parity');
+	expectEqual(row2.doubled, 40, 'Mix 2.doubled');
+}
+
+function expectMerge(globalJson) {
+	const itemTable = globalJson.ItemTable;
+	if (!itemTable) {
+		fail('global.json is missing ItemTable');
+	}
+	expectEqual(itemTable._ids, [5, 6, 7, 8, 1, 2, 3, 4], 'ItemTable._ids');
+	for (let n = 1; n <= 8; n++) {
+		expectEqual(itemTable[String(n)].Id, n, `ItemTable ${n}.Id`);
+		expectEqual(itemTable[String(n)].Name, `name${n}`, `ItemTable ${n}.Name`);
+	}
+	const mergeRows = globalJson.MergeRows;
+	if (!mergeRows || !mergeRows['1'] || !mergeRows['2']) {
+		fail('global.json is missing MergeRows');
+	}
+	expectEqual(mergeRows._ids, [2, 1], 'MergeRows._ids');
+	expectEqual(mergeRows['2'], { id: 2, name: 'beta', buddy: 1 }, 'MergeRows 2');
+	expectEqual(mergeRows['1'], { id: 1, name: 'alpha', buddy: 1 }, 'MergeRows 1');
 }
 
 phase('Build project');
@@ -171,6 +220,7 @@ phase('Check generated outputs');
 verifyRequiredOutputs();
 parseJson('testcase/exports/global.json');
 expectTypeMatrix();
+expectMerge(JSON.parse(fs.readFileSync(absolute('testcase/exports/global.json'), 'utf8')));
 parseJson('testcase/exports/json/TypeHighChecker.json');
 expectFileIncludes('testcase/exports/global_proto2.proto', 'syntax = "proto2"');
 expectFileIncludes('testcase/exports/global_proto3.proto', 'syntax = "proto3"');

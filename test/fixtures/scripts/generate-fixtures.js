@@ -240,6 +240,28 @@ function initialize(Sheets, typeDefs) {
 		def.getRowDataByColumnName('missingCol');
 		return true;
 	});
+	typeDefs.WrapTranslate = def.TTranslate(int.DVAL(5), (data) => data * 10);
+	typeDefs.ThenTranslate = def.TTranslate(int, (data) => data * 10).DVAL(5);
+	typeDefs.CustomOfTranslate = def.TCustom(def.TTranslate(int, (data) => data * 10), (data) => {
+		if (data < 20) throw new Error('translated below 20');
+	});
+	typeDefs.TranslateOfCustom = def.TTranslate(def.TCustom(int, (data) => {
+		if (data < 0) throw new Error('raw below zero');
+	}), (data) => data * 10);
+	typeDefs.AllDefaultPair = def.TObject({
+		a: int.DVAL(3),
+		b: typeDefs.string.DVAL('z')
+	});
+	typeDefs.JsonMix = def.TJson({
+		nums: def.TArray(int),
+		tag: def.TCustom(int.DVAL(5), (data) => {
+			if (data < 0) throw new Error('json tag is negative');
+		})
+	});
+	typeDefs.ParityUnique = def.TTranslate(int, (data) => data % 2);
+	typeDefs.DoubledNonZero = def.TTranslate(int, (data) => data * 10);
+	typeDefs.PartialStruct = def.TStruct({ x: int, y: int.DVAL(7) });
+	typeDefs.ZeroTranslate = def.TTranslate(int, () => 0);
 }
 
 function onExportAllDone() {}
@@ -484,7 +506,14 @@ function writeNegativeCsvFixtures() {
 		'InitObjectArray.csv': tableRows(['id'], ['*'], ['int'], [['1']]),
 		'InitVectorCount.csv': tableRows(['id'], ['*'], ['int'], [['1']]),
 		'InitJsonBad.csv': tableRows(['id'], ['*'], ['int'], [['1']]),
-		'InitRequireMissing.csv': tableRows(['id'], ['*'], ['int'], [['1']])
+		'InitRequireMissing.csv': tableRows(['id'], ['*'], ['int'], [['1']]),
+		'CustomWrapTranslateEmpty.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'WrapTranslate<!N>'], [['1', '']]),
+		'CustomTranslateBelow.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'CustomOfTranslate'], [['1', '1']]),
+		'CustomRawBelow.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'TranslateOfCustom'], [['1', '-1']]),
+		'CustomPartialRequired.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'PartialStruct<!N>'], [['1', '']]),
+		'CustomJsonTag.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'JsonMix'], [['1', '{"tag":-1}']]),
+		'CustomParityDup.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'ParityUnique<!!>'], [['1', '1'], ['3', '3']]),
+		'CustomTranslatedZero.csv': tableRows(['id', 'value'], ['*', '*'], ['int<!!>', 'ZeroTranslate<!0>'], [['1', '4']])
 	};
 	for (const [fileName, rows] of Object.entries(cases)) {
 		writeFile(path.join(negativeDir, fileName), csv(rows));
@@ -519,6 +548,43 @@ function writeNegativeCsvFixtures() {
 		['', 2]
 	]);
 	xlsx.writeFile(dupHeader, path.join(negativeDir, 'DupHeader.xlsx'));
+
+	const mergeTypeHeader = [
+		['#', 'merge type', ''],
+		['', 'id', 'name'],
+		['$', '*', '*']
+	];
+	const mergeTypeSource = xlsx.utils.book_new();
+	addSheet(mergeTypeSource, 'MergeType', mergeTypeHeader.concat([
+		['*', 'int<!!>', 'string'],
+		['', 1, 'left']
+	]));
+	xlsx.writeFile(mergeTypeSource, path.join(negativeDir, 'MergeTypeSource.xlsx'));
+
+	const mergeTypeMismatch = xlsx.utils.book_new();
+	addSheet(mergeTypeMismatch, 'MergeType', mergeTypeHeader.concat([
+		['*', 'string', 'string'],
+		['', 2, 'right']
+	]));
+	xlsx.writeFile(mergeTypeMismatch, path.join(negativeDir, 'MergeTypeMismatch.xlsx'));
+
+	const mergeDupHeader = [
+		['#', 'merge dup', ''],
+		['', 'id', 'name'],
+		['$', '*', '*'],
+		['*', 'int<!!>', 'string']
+	];
+	const mergeDupSource = xlsx.utils.book_new();
+	addSheet(mergeDupSource, 'MergeDup', mergeDupHeader.concat([
+		['', 1, 'same']
+	]));
+	xlsx.writeFile(mergeDupSource, path.join(negativeDir, 'MergeDupSource.xlsx'));
+
+	const mergeUniqueDup = xlsx.utils.book_new();
+	addSheet(mergeUniqueDup, 'MergeDup', mergeDupHeader.concat([
+		['', 1, 'same']
+	]));
+	xlsx.writeFile(mergeUniqueDup, path.join(negativeDir, 'MergeUniqueDup.xlsx'));
 }
 
 function addSheet(workbook, sheetName, rows, merges) {
@@ -617,7 +683,39 @@ function writeTypeMatrixWorkbook() {
 		[''].concat([1, 1, 1, 'ab', '{"value":"ok","kind":1}', '1,3', '2,3', 1]),
 		[''].concat([2, '', '', '', '{}', '5', '1,1', 2])
 	]);
+	const mixHeaders = [
+		'id', 'wrapTranslate', 'thenTranslate', 'thenTranslateRequired', 'customOfTranslate',
+		'translateOfCustom', 'allRequired', 'jsonMix', 'parity', 'doubled'
+	];
+	addSheet(book, 'Mix', [
+		['#', 'translate custom json and required defaults'].concat(new Array(mixHeaders.length - 1).fill('')),
+		[''].concat(mixHeaders),
+		['$'].concat(mixHeaders.map(() => '*')),
+		['*'].concat([
+			'int<!!>', 'WrapTranslate', 'ThenTranslate', 'ThenTranslate<!N>', 'CustomOfTranslate',
+			'TranslateOfCustom', 'AllDefaultPair<!N>', 'JsonMix', 'ParityUnique<!!>', 'DoubledNonZero<!0>'
+		]),
+		[''].concat([1, 3, 3, 4, 3, 3, '8,y', '{"nums":[1,2]}', 1, 3]),
+		[''].concat([2, '', '', '', 2, 0, '', '{}', 2, 4])
+	]);
 	xlsx.writeFile(book, path.join(rootDir, 'testcase', 'TypeMatrix.xlsx'));
+
+	const mergeHeader = [
+		['#', 'merge rows', '', ''],
+		['', 'id', 'name', 'buddy'],
+		['$', '*', '*', '*'],
+		['*', 'int<!!>', 'string', 'MergeRows.id']
+	];
+	const mergeA = xlsx.utils.book_new();
+	addSheet(mergeA, 'MergeRows', mergeHeader.concat([
+		['', 1, 'alpha', 1]
+	]));
+	xlsx.writeFile(mergeA, path.join(rootDir, 'testcase', 'MergeA.xlsx'));
+	const mergeB = xlsx.utils.book_new();
+	addSheet(mergeB, 'MergeRows', mergeHeader.concat([
+		['', 2, 'beta', 1]
+	]));
+	xlsx.writeFile(mergeB, path.join(rootDir, 'testcase', 'MergeB.xlsx'));
 }
 
 function writeConfigs() {
@@ -699,7 +797,7 @@ function writeConfigs() {
 }
 
 function isNegativeCaseFile(name) {
-	if (name === 'CustomSource.csv' || name === 'DupSource.xlsx') return false;
+	if (name === 'CustomSource.csv' || name === 'DupSource.xlsx' || name === 'MergeTypeSource.xlsx' || name === 'MergeDupSource.xlsx') return false;
 	return name.endsWith('.csv') || name.endsWith('.xlsx');
 }
 
@@ -722,6 +820,12 @@ function negativeIncludePath(fileName) {
 	}
 	if (fileName === 'DupHeader.xlsx') {
 		return ['./test/fixtures/negative/DupSource.xlsx', `./test/fixtures/negative/${fileName}`];
+	}
+	if (fileName === 'MergeTypeMismatch.xlsx') {
+		return ['./test/fixtures/negative/MergeTypeSource.xlsx', `./test/fixtures/negative/${fileName}`];
+	}
+	if (fileName === 'MergeUniqueDup.xlsx') {
+		return ['./test/fixtures/negative/MergeDupSource.xlsx', `./test/fixtures/negative/${fileName}`];
 	}
 	return `./test/fixtures/negative/${fileName}`;
 }

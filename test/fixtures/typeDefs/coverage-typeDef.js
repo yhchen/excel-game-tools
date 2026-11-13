@@ -37,6 +37,28 @@ function initialize(Sheets, typeDefs) {
 		def.getRowDataByColumnName('missingCol');
 		return true;
 	});
+	typeDefs.WrapTranslate = def.TTranslate(int.DVAL(5), (data) => data * 10);
+	typeDefs.ThenTranslate = def.TTranslate(int, (data) => data * 10).DVAL(5);
+	typeDefs.CustomOfTranslate = def.TCustom(def.TTranslate(int, (data) => data * 10), (data) => {
+		if (data < 20) throw new Error('translated below 20');
+	});
+	typeDefs.TranslateOfCustom = def.TTranslate(def.TCustom(int, (data) => {
+		if (data < 0) throw new Error('raw below zero');
+	}), (data) => data * 10);
+	typeDefs.AllDefaultPair = def.TObject({
+		a: int.DVAL(3),
+		b: typeDefs.string.DVAL('z')
+	});
+	typeDefs.JsonMix = def.TJson({
+		nums: def.TArray(int),
+		tag: def.TCustom(int.DVAL(5), (data) => {
+			if (data < 0) throw new Error('json tag is negative');
+		})
+	});
+	typeDefs.ParityUnique = def.TTranslate(int, (data) => data % 2);
+	typeDefs.DoubledNonZero = def.TTranslate(int, (data) => data * 10);
+	typeDefs.PartialStruct = def.TStruct({ x: int, y: int.DVAL(7) });
+	typeDefs.ZeroTranslate = def.TTranslate(int, () => 0);
 }
 
 function onExportAllDone() {}
