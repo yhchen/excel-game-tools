@@ -11,7 +11,7 @@
     "verify:fixtures": "node scripts/verify-fixtures.js",
     "verify:pkg": "node scripts/verify-package-artifacts.js",
     "build": "cd TypeDef && tsc && cd .. && tsc",
-    "pkg": "pkg -t node22-linux,node22-macos,node22-win --compress GZip . --out-path=bin/",
+    "build:pkg": "pkg -t node22-linux,node22-macos,node22-win --compress GZip . --out-path=bin/",
     "prepublishOnly": "npm run build"
   },
   "author": "yhchen",
