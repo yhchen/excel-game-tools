@@ -32,6 +32,7 @@ function initialize(Sheets, typeDefs) {
         key: int.DVAL(1),
         // value
         value: int,
+        //#endregion
     });
     ////////////////////////////////////////////////////////////////////////////////
     // ?????????? initialize sheet table here ??????????
@@ -62,8 +63,10 @@ function initialize(Sheets, typeDefs) {
         /// Guild things
         /// </summary>
         Special: 104,
+        //#endregion
     });
     const AppType = typeDefs.AppType = def_1.def.TEnum({
+        // client host
         ClientH: 0,
         ClientM: 1,
         Gate: 2,

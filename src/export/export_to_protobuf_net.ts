@@ -43,12 +43,23 @@ function GET_COMMON_USING_HEADER(): string {
 	// return `using ProtoBuf;${gCfg.LineBreak}`;
 }
 
+function indentCsharp(text: string): string {
+	return text.split(gCfg.LineBreak).map(line => line.length === 0 ? '' : '    ' + line).join(gCfg.LineBreak);
+}
+
+function wrapCsharpNamespace(namespaceName: string, body: string): string {
+	const indented = indentCsharp(body);
+	const afterOpen = gCfg.LineBreak + indented;
+	const beforeClose = afterOpen.endsWith(gCfg.LineBreak) ? '' : gCfg.LineBreak;
+	return `namespace ${namespaceName}${gCfg.LineBreak}{${afterOpen}${beforeClose}}${gCfg.LineBreak}`;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 class ProtobufNetExport extends utils.IExportWrapper {
 	private TABLE_ROW_NAME = this._exportCfg.ARRAY_ELEMENT_NAME ?? 'Arr';
 	private TABLE_PREFIX = this._exportCfg.ARRAY_ELEMENT_NAME ?? 'Arr';
-	private readonly ARR_FILE_HEADER = '/** This is an automatically generated class by excel export tools. Please do not modify it. **/' + gCfg.LineBreak + gCfg.LineBreak + gCfg.LineBreak;
+	private readonly ARR_FILE_HEADER = '/** This is an automatically generated class by excel export tools. Please do not modify it. **/' + gCfg.LineBreak + gCfg.LineBreak;
 
 	constructor(exportCfg: utils.ExportCfg) {
 		super(exportCfg);
@@ -93,16 +104,13 @@ class ProtobufNetExport extends utils.IExportWrapper {
 			usingContext += gCfg.LineBreak;
 		}
 		// generate table proto
-		const namespaceContext = this._exportCfg.Namespace ? `namespace ${this._exportCfg.Namespace}${gCfg.LineBreak}{${gCfg.LineBreak}` : undefined;
 		const name = dt.sheetName;
 		let sheetType = this.GenSheetType(name, dt, FMT);
 		let sheetContext = `${usingContext}`;
 		if (sheetType) {
 			let data = usingContext;
-			if (namespaceContext) {
-				sheetContext += `${namespaceContext}` +
-					sheetType.split(gCfg.LineBreak).join(`${gCfg.LineBreak}    `) +
-					`${gCfg.LineBreak}}`;
+			if (this._exportCfg.Namespace) {
+				sheetContext += wrapCsharpNamespace(this._exportCfg.Namespace, sheetType);
 			} else {
 				sheetContext += sheetType;
 			}
@@ -126,12 +134,9 @@ class ProtobufNetExport extends utils.IExportWrapper {
 			}
 			let leadTypeMessage = `${GET_COMMON_USING_HEADER()}${gCfg.LineBreak}`;
 			if (this._exportCfg.Namespace) {
-				leadTypeMessage += `namespace ${this._exportCfg.Namespace}${gCfg.LineBreak}` +
-					`{${gCfg.LineBreak}` +
-					`${define.split(gCfg.LineBreak).join(`${gCfg.LineBreak}    `)}${gCfg.LineBreak}` +
-					`}${gCfg.LineBreak}`;
+				leadTypeMessage += wrapCsharpNamespace(this._exportCfg.Namespace, define);
 			} else {
-				leadTypeMessage += `${define}${gCfg.LineBreak}`;
+				leadTypeMessage += define;
 			}
 			const outfile = this.getOutputFilePath(name);
 			await this.writeFileAsync(outfile, leadTypeMessage);
@@ -186,20 +191,16 @@ class ProtobufNetExport extends utils.IExportWrapper {
 			const name = dataTable.sheetName;
 			let sheetType = this.GenSheetType(name, dataTable, FMT);
 			if (sheetType) {
-				exTypeData += `${sheetType}${gCfg.LineBreak}${gCfg.LineBreak}`;
+				exTypeData += `${sheetType}${gCfg.LineBreak}`;
 			}
 		}
 
-		const NamespaceContent = this._exportCfg.Namespace ? `namespace ${this._exportCfg.Namespace}${gCfg.LineBreak}{${gCfg.LineBreak}` : undefined;
 		let leadTypeMessage = '';
 		for (const [key, value] of this._leadTypeMap) {
-			leadTypeMessage += value + gCfg.LineBreak;
+			leadTypeMessage += value;
 		}
-		exTypeData = `${leadTypeMessage}${exTypeData}${gCfg.LineBreak}`;
+		exTypeData = `${leadTypeMessage}${exTypeData}`;
 
-		if (this._exportCfg.Namespace) {
-			exTypeData = `    ` + exTypeData.split(gCfg.LineBreak).join(`${gCfg.LineBreak}    `);
-		}
 		let data = GET_COMMON_USING_HEADER();
 		if (this._exportCfg.UseNamespace) {
 			for (let using of this._exportCfg.UseNamespace) {
@@ -207,9 +208,11 @@ class ProtobufNetExport extends utils.IExportWrapper {
 			}
 			data += gCfg.LineBreak;
 		}
-		data += `${NamespaceContent}${gCfg.LineBreak}` +
-			exTypeData +
-			(NamespaceContent == undefined ? '' : `${gCfg.LineBreak}}${gCfg.LineBreak}`);
+		if (this._exportCfg.Namespace) {
+			data += wrapCsharpNamespace(this._exportCfg.Namespace, exTypeData);
+		} else {
+			data += exTypeData;
+		}
 		await this.writeFileAsync(outdir, data);
 		utils.debug(`${utils.green('[SUCCESS]')} Output file '${utils.yellow_ul(outdir)}'. `
 			+ `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
@@ -299,7 +302,7 @@ class ProtobufNetExport extends utils.IExportWrapper {
 				;
 			}
 		}
-		data += `}${gCfg.LineBreak}${gCfg.LineBreak}`;
+		data += `}${gCfg.LineBreak}`;
 		const classDef =
 			`[ProtoContract]${gCfg.LineBreak}` +
 			// `[DataContract]${gCfg.LineBreak}` +
@@ -456,7 +459,7 @@ class ProtobufNetExport extends utils.IExportWrapper {
 			if (EnableRegion) {
 				comment = comment.replace(/\/\/#region/g, '#region').replace(/\/\/#endregion/g, '#endregion');
 			}
-			body += comment;
+			body += comment + gCfg.LineBreak;
 		}
 
 		let classType = typeDef.__inner__is_struct_parse_mode__ ? "struct" : "class";
@@ -522,7 +525,7 @@ Array(Enum({
 				`    [ProtoEnum]${gCfg.LineBreak}` +
 				`    ${[key]} = ${enumObject[key]},` + gCfg.LineBreak;
 		}
-		if (typeDef.__inner__def_comment?.tail) {
+		if (typeDef.__inner__def_comment?.tail && typeDef.__inner__def_comment.tail.length > 0) {
 			let comment = `    ` + typeDef.__inner__def_comment.tail.join(`${gCfg.LineBreak}    `);
 			if (EnableRegion) {
 				comment = comment.replace(/\/\/#region/g, '#region').replace(/\/\/#endregion/g, '#endregion');

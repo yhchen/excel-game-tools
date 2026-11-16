@@ -88,6 +88,128 @@ function expectFileIncludes(relativePath, expectedText) {
 	}
 }
 
+function csharpLines(relativePath) {
+	const lines = fs.readFileSync(absolute(relativePath), 'utf8').split('\n');
+	if (lines.length > 0 && lines[lines.length - 1] === '') lines.pop();
+	return lines;
+}
+
+function expectCsharpBlankLines() {
+	const files = [];
+	const walk = (dir) => {
+		for (const name of fs.readdirSync(dir)) {
+			const full = path.join(dir, name);
+			if (fs.statSync(full).isDirectory()) walk(full);
+			else if (name.endsWith('.cs')) files.push(full);
+		}
+	};
+	walk(absolute('testcase/exports'));
+	if (files.length === 0) fail('no generated C# files');
+	const banner = '/** This is an automatically generated class by excel export tools. Please do not modify it. **/';
+	for (const filePath of files) {
+		const relativePath = path.relative(rootDir, filePath);
+		const lines = csharpLines(relativePath);
+		if (lines[0] !== banner) fail(`${relativePath} banner is ${JSON.stringify(lines[0])}`);
+		if (lines[1] !== '') fail(`${relativePath} needs one blank line under the banner`);
+		if (lines[2] === '' || !lines[2].startsWith('using ')) fail(`${relativePath} third line should be a using`);
+		for (let i = 0; i < lines.length; i++) {
+			if (/^[ \t]+$/.test(lines[i])) fail(`${relativePath}:${i + 1} is whitespace-only`);
+			if (lines[i].trim() === '' && lines[i + 1] !== undefined && lines[i + 1].trim() === '') {
+				fail(`${relativePath}:${i + 1} starts a double blank`);
+			}
+			if (lines[i].trim() === '}' && i > 0 && lines[i - 1].trim() === '') {
+				fail(`${relativePath}:${i + 1} has a blank line above }`);
+			}
+		}
+	}
+	const chunk = (parts) => parts.join('\n');
+	expectFileIncludes('testcase/exports/protobuf-net/EItemType.cs', chunk([
+		'        [ProtoEnum]',
+		'        Special = 104,',
+		'        #endregion',
+		'    }',
+		'}',
+	]));
+	expectFileIncludes('testcase/exports/protobuf-net/EItemType.cs', 'player pet');
+	expectFileIncludes('testcase/exports/protobuf-net/EItemFlags.cs', '[ProtoContract, Flags]');
+	expectFileIncludes('testcase/exports/protobuf-net/EItemFlags.cs', chunk([
+		'namespace Hotfix',
+		'{',
+		'',
+		'    [ProtoContract, Flags]',
+		'    public enum EItemFlags',
+		'    {',
+		'        [ProtoEnum]',
+		'        None = 0,',
+		'',
+		'        [ProtoEnum]',
+		'        Read = 1,',
+	]));
+	expectFileIncludes('testcase/exports/protobuf-net/EItemFlags.cs', chunk([
+		'        ReadWrite = 3,',
+		'    }',
+		'}',
+	]));
+	expectFileIncludes('testcase/exports/protobuf-net/AppType.cs', chunk([
+		'        // client host',
+		'        [ProtoEnum]',
+		'        ClientH = 0,',
+		'',
+		'        [ProtoEnum]',
+		'        ClientM = 1,',
+	]));
+	expectFileIncludes('testcase/exports/protobuf-net/AppType.cs', chunk([
+		'        Logic = 3,',
+		'    }',
+		'}',
+	]));
+	expectFileIncludes('testcase/exports/protobuf-net/KVJson.cs', chunk([
+		'        // value',
+		'        [ProtoMember(2)]',
+		'        public int value { get; set; }',
+		'        #endregion',
+		'    }',
+		'}',
+	]));
+	expectFileIncludes('testcase/exports/protobuf-net/Example.cs', chunk([
+		'    public partial class ExampleCategory : ACategory<Example>{}',
+		'',
+		'    [ProtoContract]',
+	]));
+	expectFileIncludes('testcase/exports/protobuf-net/Example.cs', chunk([
+		'    }',
+		'',
+		'    [ProtoContract]',
+		'    public partial class listExample',
+		'    {',
+		'        [ProtoMember(1)]',
+	]));
+	expectFileIncludes('testcase/exports/protobuf-net/_v_int.cs', chunk([
+		'    public partial class _v_int {',
+		'',
+		'        [ProtoMember(1)]',
+		'        public int[] a { get; set; }',
+		'',
+		'        [ProtoIgnore]',
+		'        public int this[int index]',
+		'        {',
+		'            get => this.a[index];',
+		'            set => this.a[index] = value;',
+		'        }',
+		'    }',
+		'}',
+	]));
+	expectFileIncludes('testcase/exports/global.cs', chunk([
+		'        public float y { get; set; }',
+		'    }',
+		'',
+		'    [Serializable]',
+		'    [ProtoContract]',
+		'    public partial class vector3',
+	]));
+	expectFileIncludes('testcase/exports/protobuf-net/PointStruct.cs', 'public partial struct PointStruct');
+}
+
 function expectEqual(actual, expected, label) {
 	const actualText = JSON.stringify(actual);
 	const expectedText = JSON.stringify(expected);
@@ -224,5 +346,6 @@ expectMerge(JSON.parse(fs.readFileSync(absolute('testcase/exports/global.json'),
 parseJson('testcase/exports/json/TypeHighChecker.json');
 expectFileIncludes('testcase/exports/global_proto2.proto', 'syntax = "proto2"');
 expectFileIncludes('testcase/exports/global_proto3.proto', 'syntax = "proto3"');
+expectCsharpBlankLines();
 
 console.log('\n[verify-fixtures] All checks passed.');

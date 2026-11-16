@@ -35,6 +35,7 @@ export function initialize(Sheets: { [key in SheetList]: { [key: string]: ((valu
 		key: int.DVAL(1),
 		// value
 		value: int,
+		//#endregion
 	});
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -67,8 +68,10 @@ export function initialize(Sheets: { [key in SheetList]: { [key: string]: ((valu
 		/// Guild things
 		/// </summary>
 		Special: 104,
+		//#endregion
 	});
 	const AppType = typeDefs.AppType = def.TEnum({
+		// client host
 		ClientH: 0,
 		ClientM: 1,
 		Gate: 2,
