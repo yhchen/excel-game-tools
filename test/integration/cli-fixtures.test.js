@@ -189,6 +189,32 @@ test('positive scalar edges export defaults, checkers, bounds, and go files', ()
 	assert.match(fs.readFileSync(path.join(goDir, 'loadConfig.go'), 'utf8'), /_Edges := newEdges\(\)/);
 });
 
+test('csharp export without a namespace keeps one blank line after usings', () => {
+	const caseName = 'positive-csharp-no-namespace';
+	cleanCase(caseName);
+	const result = runCli(config(caseName), typeDef('positive-typeDef.js'));
+	assertSuccess(result);
+	const dir = tmpPath(caseName);
+	const sheet = fs.readFileSync(path.join(dir, 'BasicTypes.cs'), 'utf8');
+	const lead = fs.readFileSync(path.join(dir, 'TestEnum.cs'), 'utf8');
+	assert.match(sheet, /using ETModel;\n\n\/\/ excel:/);
+	assert.doesNotMatch(sheet, /using ETModel;\n\n\n/);
+	assert.match(lead, /using System;\n\n\[ProtoContract\]/);
+	assert.doesNotMatch(lead, /using System;\n\n\n/);
+	assert.equal(sheet.includes('namespace'), false);
+	assert.equal(lead.includes('namespace'), false);
+	for (const [label, text] of [['BasicTypes.cs', sheet], ['TestEnum.cs', lead]]) {
+		const lines = text.split('\n');
+		if (lines.length > 0 && lines[lines.length - 1] === '') lines.pop();
+		for (let i = 0; i < lines.length; i++) {
+			assert.equal(/^[ \t]+$/.test(lines[i]), false, `${label}:${i + 1} is whitespace-only`);
+			if (lines[i].trim() === '' && lines[i + 1] !== undefined && lines[i + 1].trim() === '') {
+				assert.fail(`${label}:${i + 1} starts a double blank`);
+			}
+		}
+	}
+});
+
 test('debug output flag runs a successful export', () => {
 	const caseName = 'positive-scalar-edges';
 	cleanCase(caseName);

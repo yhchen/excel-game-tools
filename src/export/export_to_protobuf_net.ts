@@ -101,7 +101,9 @@ class ProtobufNetExport extends utils.IExportWrapper {
 			for (let using of this._exportCfg.UseNamespace) {
 				usingContext += `using ${using};${gCfg.LineBreak}`;
 			}
-			usingContext += gCfg.LineBreak;
+			if (this._exportCfg.Namespace) {
+				usingContext += gCfg.LineBreak;
+			}
 		}
 		// generate table proto
 		const name = dt.sheetName;
@@ -132,9 +134,9 @@ class ProtobufNetExport extends utils.IExportWrapper {
 				utils.debug(`ignore type export: ${name}`);
 				continue;
 			}
-			let leadTypeMessage = `${GET_COMMON_USING_HEADER()}${gCfg.LineBreak}`;
+			let leadTypeMessage = GET_COMMON_USING_HEADER();
 			if (this._exportCfg.Namespace) {
-				leadTypeMessage += wrapCsharpNamespace(this._exportCfg.Namespace, define);
+				leadTypeMessage += gCfg.LineBreak + wrapCsharpNamespace(this._exportCfg.Namespace, define);
 			} else {
 				leadTypeMessage += define;
 			}
@@ -206,7 +208,9 @@ class ProtobufNetExport extends utils.IExportWrapper {
 			for (let using of this._exportCfg.UseNamespace) {
 				data += `using ${using};${gCfg.LineBreak}`;
 			}
-			data += gCfg.LineBreak;
+			if (this._exportCfg.Namespace) {
+				data += gCfg.LineBreak;
+			}
 		}
 		if (this._exportCfg.Namespace) {
 			data += wrapCsharpNamespace(this._exportCfg.Namespace, exTypeData);
