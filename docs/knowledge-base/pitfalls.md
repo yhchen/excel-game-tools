@@ -24,7 +24,7 @@
 
 `package-lock.json` is intentionally tracked. Use `npm ci` for ordinary setup and validation; use `npm install` only for intentional dependency changes, then review and commit the lockfile with `package.json`.
 
-`npm run pkg` uses `@yao-pkg/pkg` on the Node 22 baseline. Package changes must preserve dynamic external `typeDef.js` loading and should be verified with `npm run verify:pkg`.
+`npm run pkg` uses `@yao-pkg/pkg` on the Node 22 baseline. Targets must name the architecture: `node22-linux-x64`, `node22-macos-arm64`, and `node22-win-x64`. A target without an architecture follows the build machine, so an arm64 Mac emits Windows and Linux ARM binaries. Output names are `bin/excel-game-tools-linux-x64`, `bin/excel-game-tools-macos-arm64`, and `bin/excel-game-tools-win-x64.exe`. Package changes must preserve dynamic external `typeDef.js` loading and should be verified with `npm run verify:pkg`.
 
 The CLI and parser use process-level global state such as `gCfg`, `ExportExcelDataMap`, and `TypeDefParser.InitFlag`. Integration tests should run `dist/index.js` in child processes instead of importing and calling `execute()` repeatedly in the same process.
 

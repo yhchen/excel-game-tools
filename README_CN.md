@@ -35,7 +35,7 @@ npm run build
 ```bash
 npm run pkg
 ```
-这会在 `bin/` 目录下生成各个平台的可执行文件。`npm run pkg` 通过 `@yao-pkg/pkg` 构建 Node 22 的 Linux、macOS 和 Windows 独立可执行文件。
+这会在 `bin/` 目录下生成各个平台的可执行文件。`npm run pkg` 通过 `@yao-pkg/pkg` 构建 Node 22 的独立可执行文件：Linux x64、macOS arm64、Windows x64。目标里写明架构，是因为省略架构时 `pkg` 会跟随当前编译机器的 CPU。
 
 ### 验证
 
@@ -58,7 +58,7 @@ npm test
 node dist/index.js -c config.json -t typeDef.js
 
 # 或使用打包好的二进制文件（以 Windows 为例）
-./bin/excel-game-tools-win.exe -c config.json -t typeDef.js
+./bin/excel-game-tools-win-x64.exe -c config.json -t typeDef.js
 ```
 *（注意：当使用 `pkg` 打包的二进制文件运行时，通过 `-t` 参数传入的 `typeDef.js` 是一个外部文件，工具会在运行时动态加载它，不需要一起打包）。*
 

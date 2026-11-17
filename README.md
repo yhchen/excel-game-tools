@@ -35,7 +35,7 @@ npm run build
 ```bash
 npm run pkg
 ```
-This generates binaries in the `bin/` directory. `npm run pkg` builds Node 22 standalone binaries for Linux, macOS, and Windows through `@yao-pkg/pkg`.
+This generates binaries in the `bin/` directory. `npm run pkg` builds Node 22 standalone binaries through `@yao-pkg/pkg`: Linux x64, macOS arm64, and Windows x64. The targets include the architecture because a target without one follows the machine running the build.
 
 ### Validation
 
@@ -58,7 +58,7 @@ This builds the TypeDef package and main project, runs Node built-in unit tests,
 node dist/index.js -c config.json -t typeDef.js
 
 # OR using the compiled binary (e.g., Windows)
-./bin/excel-game-tools-win.exe -c config.json -t typeDef.js
+./bin/excel-game-tools-win-x64.exe -c config.json -t typeDef.js
 ```
 *(Note: When using the packaged binary via `pkg`, the `typeDef.js` passed via the `-t` parameter is evaluated dynamically at runtime from the folder the binary is running in).*
 

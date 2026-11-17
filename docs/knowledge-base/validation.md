@@ -82,7 +82,7 @@ node dist/index.js -c src/config_tpl.json -t testcase/typeDef.js
 npm run pkg
 ```
 
-预期行为：使用 `pkg` 生成 Linux、macOS、Windows 可执行文件到 `bin/`。
+预期行为：使用 `pkg` 生成 Linux x64、macOS arm64、Windows x64 可执行文件到 `bin/`，文件名分别为 `excel-game-tools-linux-x64`、`excel-game-tools-macos-arm64`、`excel-game-tools-win-x64.exe`。
 
 ### Package artifact validation
 

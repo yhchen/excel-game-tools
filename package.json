@@ -11,7 +11,8 @@
     "verify:fixtures": "node scripts/verify-fixtures.js",
     "verify:pkg": "node scripts/verify-package-artifacts.js",
     "build": "cd TypeDef && tsc && cd .. && tsc",
-    "build:pkg": "pkg -t node22-linux,node22-macos,node22-win --compress GZip . --out-path=bin/",
+    "pkg": "pkg -t node22-linux-x64,node22-macos-arm64,node22-win-x64 --compress GZip . --out-path=bin/ && rm -f bin/excel-game-tools-linux bin/excel-game-tools-macos bin/excel-game-tools-win.exe",
+    "build:pkg": "npm run pkg",
     "prepublishOnly": "npm run build"
   },
   "author": "yhchen",
